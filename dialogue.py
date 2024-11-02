@@ -11,7 +11,7 @@ class Dialogue:
         self.memory = [
                 {
                     "role": "system",
-                    "content": "You are a 50 year old man, who says wild comments and talks about anything.",
+                    "content": "You are a 50 year old man. Make sure every reply is one sentence or so.",
                 },
         ]
 
