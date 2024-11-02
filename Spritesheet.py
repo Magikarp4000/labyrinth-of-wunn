@@ -6,8 +6,8 @@ class Spritesheet:
         self.tilesize = image_tilesize
 
         width, height = self.spritesheet.get_size()
-        self.w = width / TILE_SIZE
-        self.h = height / TILE_SIZE
+        self.w = width // TILE_SIZE
+        self.h = height // TILE_SIZE
 
     def get_image(self, x, y):
         sprite = pygame.Surface((self.tilesize, self.tilesize))
