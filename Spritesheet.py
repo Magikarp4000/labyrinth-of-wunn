@@ -1,5 +1,7 @@
 import pygame
 from config import *
+
+
 class Spritesheet:
     def __init__(self, file, image_tilesize):
         self.spritesheet = pygame.image.load(file).convert_alpha()
@@ -10,7 +12,7 @@ class Spritesheet:
         self.h = height // self.tilesize
 
     def get_image(self, x, y):
-        sprite = pygame.Surface((self.tilesize, self.tilesize))
+        sprite = pygame.Surface((self.tilesize, self.tilesize), pygame.SRCALPHA, 32).convert_alpha()
         sprite.blit(self.spritesheet, (0, 0), 
                     (x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize))
         return sprite
