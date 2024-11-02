@@ -39,11 +39,11 @@ def scale(arr, k):
 def main():
     running = True
     tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
-    camera_x = 0
-    camera_y = 0
+    camera_x = WORLD_WIDTH / 2
+    camera_y = WORLD_HEIGHT / 2
     tiles = {}
-    for i in range(500):
-        for j in range(500):
+    for i in range(WORLD_HEIGHT):
+        for j in range(WORLD_WIDTH):
             x = random.randint(0, tilesheet.w)
             y = random.randint(0, tilesheet.h)
             tile = scale_image(tilesheet.get_image(x, y), TILE_SIZE)
@@ -52,8 +52,19 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
-        for x in range(camera_x, camera_x + WIDTH):
-            for y in range(camera_y, camera_y + HEIGHT):
+        pressed = pygame.key.get_pressed()
+        if pressed[K_RIGHT]:
+            camera_x += SPEED
+        if pressed[K_LEFT]:
+            camera_x -= SPEED
+        if pressed[K_UP]:
+            camera_y -= SPEED
+        if pressed[K_DOWN]:
+            camera_y += SPEED
+        camera_x = min(WORLD_WIDTH - WIDTH - 1, max(0, camera_x))
+        camera_y = min(WORLD_HEIGHT - HEIGHT - 1, max(0, camera_y))
+        for x in range(int(camera_x), int(camera_x) + WIDTH + 1):
+            for y in range(int(camera_y), int(camera_y) + HEIGHT + 1):
                 pos_x = (x - camera_x) * TILE_SIZE
                 pos_y = (y - camera_y) * TILE_SIZE
                 screen.blit(tiles[y, x], tiles[y, x].get_rect(topleft=(pos_x, pos_y)))
