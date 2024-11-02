@@ -11,7 +11,7 @@ class Dialogue:
         self.memory = [
                 {
                     "role": "system",
-                    'content': '''You are living in a big city with murders on the run. In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'. You are a 30 year old man and you need to answer in JSON format. Make sure every reply is one sentence or so, as if in a realistic conversation.
+                    'content': '''You are living in a big city with murders on the run. In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'. You are a 30 year old man and you need to answer in JSON format. Make sure every reply is one sentence or so, as if in a realistic conversation. You are currently in bed in the morning 9:30am about to get up.
                     The JSON schema should include
 {
   "action": {
