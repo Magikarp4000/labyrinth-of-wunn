@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+from pygame.math import Vector2
+from pygame.math import clamp
 
 import random
 import math
@@ -17,23 +19,19 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 music = pygame.mixer.Sound("assets/music/m.wav")
 music.play(-1)
 
-def scale(arr, k):
-    return [x * k for x in arr]
-
-def get_camera_input(pressed):
-    dx, dy = 0, 0
+def move_camera(pressed):
+    direction = Vector2(0, 0)
     if pressed[K_RIGHT] or pressed[K_d]:
-        dx += SPEED
+        direction.x += PLAYER_SPEED
     if pressed[K_LEFT] or pressed[K_a]:
-        dx -= SPEED
+        direction.x -= PLAYER_SPEED
     if pressed[K_UP] or pressed[K_w]:
-        dy -= SPEED
+        direction.y -= PLAYER_SPEED
     if pressed[K_DOWN] or pressed[K_s]:
-        dy += SPEED
-    mag = math.sqrt(dx * dx + dy * dy)
-    if mag == 0:
-        return dx, dy
-    return dx / mag * SPEED, dy / mag * SPEED
+        direction.y += PLAYER_SPEED
+    if direction.length() > 0:
+        direction = direction.normalize() * PLAYER_SPEED
+    return direction
 
 def gen_world():
     tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
@@ -48,39 +46,43 @@ def gen_world():
             tiles[i, j] = tile
     return tiles
 
-def render_tiles(tiles, camera_x, camera_y):
-    for x in range(int(camera_x), int(camera_x) + WIDTH + 1):
-        for y in range(int(camera_y), int(camera_y) + HEIGHT + 1):
-            pos_x = (x - camera_x) * TILE_SIZE
-            pos_y = (y - camera_y) * TILE_SIZE
+def render_tiles(tiles, camera):
+    for x in range(int(camera.x), int(camera.x) + WIDTH + 1):
+        for y in range(int(camera.y), int(camera.y) + HEIGHT + 1):
+            pos_x = (x - camera.x) * TILE_SIZE
+            pos_y = (y - camera.y) * TILE_SIZE
             screen.blit(tiles[y, x], tiles[y, x].get_rect(topleft=(pos_x, pos_y)))
 
 def main():
-    camera_x = WORLD_WIDTH / 2
-    camera_y = WORLD_HEIGHT / 2
+    camera = Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2)
 
     tiles = gen_world()
-    sprites = pygame.sprite.Group()
 
+    sprites = pygame.sprite.Group()
     player = Player()
     sprites.add(player)
 
     running = True
     while running:
+        # Event handling
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
-        
-        pressed = pygame.key.get_pressed()
-        player.move(pressed)
-        dx, dy = get_camera_input(pressed)
+        keys = pygame.key.get_pressed()
 
-        camera_x = min(WORLD_WIDTH - WIDTH - 1, max(0, camera_x + dx))
-        camera_y = min(WORLD_HEIGHT - HEIGHT - 1, max(0, camera_y + dy))
+        # Camera movement
+        camera += move_camera(keys)
+        camera.x = clamp(camera.x, 0, WORLD_WIDTH - WIDTH - 1)
+        camera.y = clamp(camera.y, 0, WORLD_HEIGHT - HEIGHT - 1)
 
-        render_tiles(tiles, camera_x, camera_y)
+        # Player movement
+        player.move(keys)
+
+        # Update sprites
         sprites.update()
 
+        # Rendering
+        render_tiles(tiles, camera)
         screen.blit(player.image, player.rect)
         pygame.display.flip()
         clock.tick(FPS)

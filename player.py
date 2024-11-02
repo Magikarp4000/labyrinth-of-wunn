@@ -7,16 +7,16 @@ from scale import scale_image
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
-        sprsheet = Spritesheet("assets/Player/Player.png", 32)
         super().__init__()
-        self.speed = 5
+        spritesheet = Spritesheet("assets/Player/Player.png", 32)
+        self.speed = PLAYER_SPEED
         self.strength = 1
-        self.position = Vector2(20,20)
-        self.image = scale_image(sprsheet.get_image(0,0),64)
+        self.pos = Vector2(20, 20)
+        self.image = scale_image(spritesheet.get_image(0, 0), PLAYER_SIZE)
+        self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
 
-        self.rect = self.image.get_rect(topleft=(self.position.x,self.position.y))
     def move(self, keys):
-        direction = Vector2(0,0)
+        direction = Vector2(0, 0)
         if keys[K_s]:
             direction.y += 1
         if keys[K_w]:
@@ -28,7 +28,7 @@ class Player(pygame.sprite.Sprite):
         
         if direction.length() > 0:
             direction = direction.normalize() * self.speed
-        
-        self.position += direction
-    def update(self):
-        self.rect = self.image.get_rect(topleft=(self.position.x,self.position.y))
+        self.pos += direction
+    
+    def update(self, *args, **kwargs):
+        self.rect = self.image.get_rect(topleft=(self.pos.x, self.pos.y))
