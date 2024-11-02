@@ -4,6 +4,9 @@ import pygame
 from pygame.locals import *
 
 import random
+import player
+from Spritesheet import Spritesheet
+from scale import scale_image
 import math
 
 
@@ -13,25 +16,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 music = pygame.mixer.Sound("assets/music/m.wav")
 music.play(-1)
-
-
-class Spritesheet:
-    def __init__(self, file, image_tilesize):
-        self.spritesheet = pygame.image.load(file).convert()
-        self.tilesize = image_tilesize
-
-        width, height = self.spritesheet.get_size()
-        self.w = width // self.tilesize
-        self.h = height // self.tilesize
-
-    def get_image(self, x, y):
-        sprite = pygame.Surface((self.tilesize, self.tilesize))
-        sprite.blit(self.spritesheet, (0, 0), 
-                    (x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize))
-        return sprite
-
-def scale_image(image, size):
-    return pygame.transform.scale(image, (size, size))
 
 def scale(arr, k):
     return [x * k for x in arr]
@@ -57,6 +41,7 @@ def main():
     camera_x = WORLD_WIDTH / 2
     camera_y = WORLD_HEIGHT / 2
     tiles = {}
+    player1 = player.Player()
     for i in range(WORLD_HEIGHT):
         for j in range(WORLD_WIDTH):
             x, y = 12, 14
@@ -66,6 +51,8 @@ def main():
             tile = scale_image(tilesheet.get_image(x, y), TILE_SIZE)
             tiles[i, j] = tile
     while running:
+        keys = pygame.key.get_pressed()
+        player1.move(keys)
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -78,6 +65,8 @@ def main():
                 pos_x = (x - camera_x) * TILE_SIZE
                 pos_y = (y - camera_y) * TILE_SIZE
                 screen.blit(tiles[y, x], tiles[y, x].get_rect(topleft=(pos_x, pos_y)))
+        player1.update()
+        screen.blit(player1.image,player1.rect)
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
