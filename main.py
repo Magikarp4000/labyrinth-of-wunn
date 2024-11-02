@@ -4,34 +4,14 @@ import pygame
 from pygame.locals import *
 
 import random
+import player
+from Spritesheet import Spritesheet
+from scale import scale_image
 
 
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-
-class Spritesheet:
-    def __init__(self, file, image_tilesize):
-        self.spritesheet = pygame.image.load(file).convert()
-        self.tilesize = image_tilesize
-
-        width, height = self.spritesheet.get_size()
-        self.w = width / TILE_SIZE
-        self.h = height / TILE_SIZE
-
-    def convert(self, idx):
-        """Return (row, col)"""
-        return divmod(idx, self.w)
-
-    def get_image(self, x, y):
-        sprite = pygame.Surface((self.tilesize, self.tilesize))
-        sprite.blit(self.spritesheet, (0, 0), 
-                    (x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize))
-        return sprite
-
-def scale_image(image, size):
-    return pygame.transform.scale(image, (size, size))
 
 def scale(arr, k):
     return [x * k for x in arr]
@@ -42,6 +22,7 @@ def main():
     camera_x = 0
     camera_y = 0
     tiles = {}
+    player1 = player.Player()
     for i in range(500):
         for j in range(500):
             x = random.randint(0, tilesheet.w)
@@ -49,6 +30,8 @@ def main():
             tile = scale_image(tilesheet.get_image(x, y), TILE_SIZE)
             tiles[i, j] = tile
     while running:
+        keys = pygame.key.get_pressed()
+        player1.move(keys)
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -57,6 +40,8 @@ def main():
                 pos_x = (x - camera_x) * TILE_SIZE
                 pos_y = (y - camera_y) * TILE_SIZE
                 screen.blit(tiles[y, x], tiles[y, x].get_rect(topleft=(pos_x, pos_y)))
+        player1.update()
+        screen.blit(player1.image,player1.rect)
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
