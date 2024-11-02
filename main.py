@@ -11,6 +11,9 @@ pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+music = pygame.mixer.Sound("assets/music/m.wav")
+music.play(-1)
+
 
 class Spritesheet:
     def __init__(self, file, image_tilesize):
