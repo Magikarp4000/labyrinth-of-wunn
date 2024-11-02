@@ -21,8 +21,8 @@ class Spritesheet:
         self.tilesize = image_tilesize
 
         width, height = self.spritesheet.get_size()
-        self.w = width // TILE_SIZE
-        self.h = height // TILE_SIZE
+        self.w = width // self.tilesize
+        self.h = height // self.tilesize
 
     def get_image(self, x, y):
         sprite = pygame.Surface((self.tilesize, self.tilesize))
@@ -59,8 +59,10 @@ def main():
     tiles = {}
     for i in range(WORLD_HEIGHT):
         for j in range(WORLD_WIDTH):
-            x = random.randint(0, tilesheet.w)
-            y = random.randint(0, tilesheet.h)
+            x, y = 12, 14
+            while (x, y) == (12, 14) or (x, y) == (15, 14):
+                x = random.randint(0, tilesheet.w - 1)
+                y = random.randint(0, tilesheet.h - 1)
             tile = scale_image(tilesheet.get_image(x, y), TILE_SIZE)
             tiles[i, j] = tile
     while running:
