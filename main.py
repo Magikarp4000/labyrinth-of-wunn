@@ -4,6 +4,7 @@ import pygame
 from pygame.locals import *
 
 import random
+import math
 
 
 pygame.init()
@@ -36,6 +37,21 @@ def scale_image(image, size):
 def scale(arr, k):
     return [x * k for x in arr]
 
+def get_input(pressed):
+    dx, dy = 0, 0
+    if pressed[K_RIGHT] or pressed[K_d]:
+        dx += SPEED
+    if pressed[K_LEFT] or pressed[K_a]:
+        dx -= SPEED
+    if pressed[K_UP] or pressed[K_w]:
+        dy -= SPEED
+    if pressed[K_DOWN] or pressed[K_s]:
+        dy += SPEED
+    mag = math.sqrt(dx * dx + dy * dy)
+    if mag == 0:
+        return dx, dy
+    return dx / mag * SPEED, dy / mag * SPEED
+
 def main():
     running = True
     tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
@@ -53,16 +69,9 @@ def main():
             if event.type == QUIT:
                 running = False
         pressed = pygame.key.get_pressed()
-        if pressed[K_RIGHT]:
-            camera_x += SPEED
-        if pressed[K_LEFT]:
-            camera_x -= SPEED
-        if pressed[K_UP]:
-            camera_y -= SPEED
-        if pressed[K_DOWN]:
-            camera_y += SPEED
-        camera_x = min(WORLD_WIDTH - WIDTH - 1, max(0, camera_x))
-        camera_y = min(WORLD_HEIGHT - HEIGHT - 1, max(0, camera_y))
+        dx, dy = get_input(pressed)
+        camera_x = min(WORLD_WIDTH - WIDTH - 1, max(0, camera_x + dx))
+        camera_y = min(WORLD_HEIGHT - HEIGHT - 1, max(0, camera_y + dy))
         for x in range(int(camera_x), int(camera_x) + WIDTH + 1):
             for y in range(int(camera_y), int(camera_y) + HEIGHT + 1):
                 pos_x = (x - camera_x) * TILE_SIZE
