@@ -21,10 +21,6 @@ class Spritesheet:
         self.w = width // TILE_SIZE
         self.h = height // TILE_SIZE
 
-    def convert(self, idx):
-        """Return (row, col)"""
-        return divmod(idx, self.w)
-
     def get_image(self, x, y):
         sprite = pygame.Surface((self.tilesize, self.tilesize))
         sprite.blit(self.spritesheet, (0, 0), 
