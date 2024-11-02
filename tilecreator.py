@@ -153,9 +153,9 @@ def _gui():
     pygame.quit()
     return _get_squares(sprites)
 
-def get_track():
+def get_tilesheet():
     squares = _gui()
-    track, start, finish = [], [], []
+    tilesheet = []
     for square in squares:
         pos = (square.x, square.y)
         if square.state == 'track':
@@ -167,26 +167,6 @@ def get_track():
             finish.append(pos)
             track.append(pos)
     track = list(dict.fromkeys(track))
-    return track, start, finish
-
-def create_generic_track(w, h):
-    track, start, finish = [], [], []
-    for y in range(h):
-        track.append((0, y))
-        track.append((w - 1, y))
-    for x in range(w):
-        track.append((x, h - 1))
-    for x in range(4, 10):
-        for y in range(14):
-            track.append((x, y))
-        start.append((x, 0))
-    for x in range(18, 24):
-        for y in range(14):
-            track.append((x, y))
-        finish.append((x, 0))
-    for y in range(7, 14):
-        for x in range(10, 18):
-            track.append((x, y))
     return track, start, finish
 
 print(get_track())
