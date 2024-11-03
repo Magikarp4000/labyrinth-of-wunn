@@ -36,6 +36,16 @@ class Camera:
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
         self.tl = self.real_pos - self.pos / BASE_TILE_SIZE
         self.br = self.real_pos + ((SCREEN_WIDTH, SCREEN_HEIGHT) - self.pos) / BASE_TILE_SIZE
+    
+    # def render_tiles(self, arr, tile_size):
+    #     for x in range(int(self.tl.x), int(self.br.x) + WIDTH + 1):
+    #         for y in range(int(self.tl.y), int(self.br.y) + HEIGHT + 1):
+    #             if (y, x) not in arr:
+    #                 continue
+    #             arr[y, x] = scale_image(arr[y, x], tile_size)
+    #             pos_x = self.pos.x - (self.real_pos.x - x) * tile_size
+    #             pos_y = self.pos.y - (self.real_pos.y - y) * tile_size
+    #             screen.blit(arr[y, x], arr[y, x].get_rect(center=(pos_x, pos_y)))
 
 class Game:
     def __init__(self):
@@ -54,9 +64,14 @@ class Game:
 
         self.in_dialogue = False
         self.wait = False
+
+        self.nps = []
+        self.tiles, self.house_tiles = self.gen_world()
     
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
+        house_image = pygame.image.load('assets/Cute_Fantasy_Free/Outdoor decoration/House.png')
+        house_tiles = {}
         tiles = {}
         for i in range(WORLD_HEIGHT):
             for j in range(WORLD_WIDTH):
@@ -66,7 +81,23 @@ class Game:
                     y = random.randint(0, tilesheet.h - 1)
                 tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
                 tiles[i, j] = tile
-        return tiles
+        num_houses = 10
+        for h1 in range(num_houses):
+            while True:
+                x,y = random.randint(15,WORLD_WIDTH-16), random.randint(10,WORLD_HEIGHT-11)
+                collision = False
+                for i5 in range(x-8,x+8):
+                    for i6 in range(y-8,y+8):
+                        if (i5,i6) in house_tiles:
+                            collision = True
+                        if collision == False:
+                            house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
+                            house_tiles[x,y] = house_image
+                        break
+                    break
+                break
+        return tiles, house_tiles
+
 
     def render_tiles(self, camera):
         for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
@@ -77,6 +108,35 @@ class Game:
                 pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
                 pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
                 screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
+        for x in range(int(camera.tl.x) - 10, int(camera.br.x) + WIDTH + 10):
+            for y in range(int(camera.tl.y) - 10, int(camera.br.y) + HEIGHT + 10):
+                if (x, y) in self.house_tiles:
+                    self.house_tiles[x, y] = pygame.transform.scale(self.house_tiles[x,y], (HOUSE_WIDTH*self.zoom,HOUSE_HEIGHT*self.zoom))
+                    pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                    pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                    screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
+    
+    def render_npcs(self, camera):
+        for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
+            for y in range(int(camera.tl.y), int(camera.br.y) + HEIGHT + 1):
+                if (y, x) not in self.tiles:
+                    continue
+                self.npcs[y, x] = scale_image(self.npcs[y, x], self.tile_size)
+                pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                screen.blit(self.npcs[y, x], self.npcs[y, x].get_rect(center=(pos_x, pos_y)))
+                if (y, x) in self.tiles:
+                    self.tiles[y, x] = scale_image(self.tiles[y, x], self.tile_size)
+                    pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                    pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                    screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
+        for x in range(int(camera.tl.x) - 10, int(camera.br.x) + WIDTH + 10):
+            for y in range(int(camera.tl.y) - 10, int(camera.br.y) + HEIGHT + 10):
+                if (x, y) in self.house_tiles:
+                    self.house_tiles[x, y] = pygame.transform.scale(self.house_tiles[x,y], (HOUSE_WIDTH*self.zoom,HOUSE_HEIGHT*self.zoom))
+                    pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                    pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                    screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
         self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
@@ -98,8 +158,8 @@ class Game:
         player = Player()
         sprites.add(player)
 
-        npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
-        sprites.add(npcs)
+        self.npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
+        sprites.add(self.npcs)
 
         camera = Camera(player)
 
@@ -113,7 +173,7 @@ class Game:
                 #Dialogue toggler    
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        collide = self.get_collision(player, npcs)
+                        collide = self.get_collision(player, self.npcs)
                         if collide is not None:
                             print(collide)
                             self.in_dialogue = not self.in_dialogue
@@ -131,7 +191,6 @@ class Game:
             # In dialogue
             if self.in_dialogue:
                 if not self.wait:
-                    print("in dialogue uwu")
                     if collide.dialogue is None:
                         collide.dialogue = Dialogue()
                         response = collide.dialogue.test("Hi! Briefly introduce yourself.")
