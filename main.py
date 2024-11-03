@@ -151,13 +151,17 @@ class Game:
         collide = pygame.sprite.spritecollideany(player, sprites)
         return collide
 
+    def get_random(self, size):
+        return random.random() * random.randint(-size, size)
+
     def main(self):
         sprites = pygame.sprite.Group()
 
         player = Player()
         sprites.add(player)
 
-        self.npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
+        self.npcs = pygame.sprite.Group([NPC(*(player.real_pos + (self.get_random(10), self.get_random(10))))
+                                         for _ in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
         camera = Camera(player)
