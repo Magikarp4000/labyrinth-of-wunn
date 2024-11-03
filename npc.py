@@ -18,7 +18,7 @@ class NPC(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.real_pos)
         self.sus = 0
         self.actions = deque()
-        # self.dialogue = Dialogue()
+        self.dialogue = None
 
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
@@ -26,6 +26,5 @@ class NPC(pygame.sprite.Sprite):
         self.actions.append(action)
     
     def update(self):
-        self.real_pos += (random.random(), random.random())
+        self.real_pos += (0.1, 0.1)
         self.rect = self.image.get_rect(center=self.real_pos)
-

@@ -6,7 +6,7 @@ pygame.font.init()
 def scale_image(image, size):
     return pygame.transform.scale(image, (size, size))
 
-def multitext(text, x, y, w, h, spacing, font, font_size, colour, pos='topleft', antialias=False):
+def multitext(text, x, y, w, spacing, font, font_size, colour, pos='topleft', antialias=False):
     images = []
     rects = []
     lines = []

@@ -10,6 +10,7 @@ from config import *
 from Player import Player
 from Spritesheet import Spritesheet
 from utils import *
+from dialogue import Dialogue
 from npc import NPC
 
 
@@ -38,6 +39,7 @@ class Camera:
 
 class Game:
     def __init__(self):
+        self.in_dialogue = False
         pygame.mixer.init()
         self.music = pygame.mixer.Sound("assets/music/m.wav")
         self.music.play(-1)
@@ -46,6 +48,9 @@ class Game:
 
         self.tile_size = BASE_TILE_SIZE
         self.tiles = self.gen_world()
+
+        self.in_dialogue = False
+        self.wait = False
     
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
@@ -74,15 +79,24 @@ class Game:
         self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
         self.tile_size = self.zoom * BASE_TILE_SIZE
 
+    def display_text(self, text):
+        text_images, text_rects = multitext(text, DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), DIALOGUE_YSPACING, 'Arial', FONT_SIZE, BLACK)
+        pygame.draw.rect(screen, WHITE, (DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), SCREEN_HEIGHT-DIALOGUE_Y-20))
+        for image, rect in zip(text_images, text_rects):
+            screen.blit(image, rect)
+    
+    def get_collision(self, player, sprites):
+        collide = pygame.sprite.spritecollideany(player, sprites)
+        return collide
+
     def main(self):
         sprites = pygame.sprite.Group()
 
         player = Player()
         sprites.add(player)
 
-        npcs = [NPC(*player.real_pos) for _ in range(NUM_NPCS)]
-        for npc in npcs:
-            sprites.add(npc)
+        npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
+        sprites.add(npcs)
 
         camera = Camera(player)
 
@@ -92,25 +106,53 @@ class Game:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
+                #Dialogue toggler    
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        collide = self.get_collision(player, npcs)
+                        print(collide)
+                        if collide is not None:
+                            self.in_dialogue = not self.in_dialogue
+                            self.wait = False
+                #End of dialogue toggler
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y)
+                if event.type == KEYDOWN:
+                    if event.key == K_x:
+                        player.attack()
             keys = pygame.key.get_pressed()
+            # In dialogue
+            if self.in_dialogue:
+                if not self.wait:
+                    if collide.dialogue is None:
+                        collide.dialogue = Dialogue()
+                        response = collide.dialogue.test("Hi! Briefly introduce yourself.")
+                        input()
+                    else:
+                        response = collide.dialogue.test(input())
+                print("ilovemagikarp")
+                self.display_text(response)
+                self.wait = True
+            # Not in dialogue
+            else:
+                # Player movement
+                player.move(keys)
+                player.update_zoom(self.zoom)
 
-            # Player movement
-            player.move(keys)
-            player.update_zoom(self.zoom)
+                # Camera movement
+                camera.update(self.zoom)
+                
+                player.update_zoom(self.zoom)
+
+                # Update sprites
+                sprites.update()
+
+                # Rendering
+                self.render_tiles(camera)
+                for sprite in sprites:
+                    screen.blit(sprite.image, sprite.rect)
             
-            # Camera movement
-            camera.update(self.zoom)
-            
-            # Update sprites
-            sprites.update()
-            
-            # Rendering
-            self.render_tiles(camera)
-            # screen.blit(player.image, player.rect)
-            for sprite in sprites:
-                screen.blit(sprite.image, sprite.rect)
+            #Rendering
             pygame.display.flip()
             clock.tick(FPS)
 

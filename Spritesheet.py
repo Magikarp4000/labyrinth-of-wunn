@@ -16,3 +16,6 @@ class Spritesheet:
         sprite.blit(self.spritesheet, (0, 0), 
                     (x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize))
         return sprite
+
+    def get_image_idx(self, idx):
+        return self.get_image(idx % self.w, idx // self.w)
