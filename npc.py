@@ -68,7 +68,6 @@ class NPC(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
     
     def die(self):
-        print("die die die")
         img = self.killanim.get_image(0)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))

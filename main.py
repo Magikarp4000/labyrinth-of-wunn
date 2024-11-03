@@ -12,7 +12,7 @@ from Spritesheet import Spritesheet
 from utils import *
 from dialogue import Dialogue
 from npc import NPC
-from action import detect_dialogue
+from action import *
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -200,6 +200,9 @@ class Game:
                             self.typed_text = None
                 if response is not None:
                     self.display_text(detect_dialogue(response))
+                    movement = detect_action(response)
+                    if movement.t == ACTION_SUICIDE:
+                        collide.die()
                     self.wait = True
             # Not in dialogue
             elif self.in_typing:
