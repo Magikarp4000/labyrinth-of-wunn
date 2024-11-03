@@ -12,7 +12,7 @@ from Spritesheet import Spritesheet
 from utils import *
 from dialogue import Dialogue
 from npc import NPC
-from action import detect_dialogue
+from action import detect_dialogue, detect_action
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -68,13 +68,14 @@ class Game:
         self.wait = False
 
         self.nps = []
-        self.tiles, self.house_tiles = self.gen_world()
+        self.tiles, self.house_tiles, self.locations = self.gen_world()
     
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
         house_image = pygame.image.load('assets/Cute_Fantasy_Free/Outdoor decoration/House.png')
         house_tiles = {}
         tiles = {}
+        house_locations = {}
         for i in range(WORLD_HEIGHT):
             for j in range(WORLD_WIDTH):
                 x, y = 12, 14
@@ -98,7 +99,10 @@ class Game:
                         break
                     break
                 break
-        return tiles, house_tiles
+        special_houses = random.sample(list(house_tiles.keys()), len(LOCATIONS))
+        for idx, house in enumerate(special_houses):
+            house_locations[LOCATIONS[idx]] = house
+        return tiles, house_tiles, house_locations
 
 
     def render_tiles(self, camera):
@@ -200,6 +204,8 @@ class Game:
                             self.typed_text = None
                 if response is not None:
                     self.display_text(detect_dialogue(response))
+                    action = detect_action(response)
+                    collide.target = self.locations[action.location]
                     self.wait = True
             # Not in dialogue
             elif self.in_typing:

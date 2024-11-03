@@ -35,6 +35,7 @@ MAX_ZOOM = 5
 ZOOM_RATE = 0.5
 
 NUM_NPCS = 1
+BASE_NPC_SPEED = 2
 
 #Dialogue
 DIALOGUE_X = SCREEN_WIDTH / 20
@@ -44,3 +45,5 @@ HOUSE_WIDTH = 120
 HOUSE_HEIGHT = 168
 
 FONT_SIZE = 25
+
+LOCATIONS = ['shop', 'office', 'haunted house', 'cafe']

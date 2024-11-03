@@ -22,6 +22,7 @@ class NPC(pygame.sprite.Sprite):
         self.dialogue = None
         self.killed = False
         self.health = 100
+        self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
 
@@ -37,6 +38,8 @@ class NPC(pygame.sprite.Sprite):
         self.size = BASE_PLAYER_SIZE
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
+
+        self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
         # self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
     def queue_action(self, action, flags):
@@ -51,7 +54,7 @@ class NPC(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
             return
         
-        self.real_pos += (0.03, 0.03)
+        self.real_pos += (self.target - self.real_pos).normalize() * self.speed
 
         ii = 0
         self.orit = 0
