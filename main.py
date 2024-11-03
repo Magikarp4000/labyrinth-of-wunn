@@ -10,7 +10,6 @@ from config import *
 from Player import Player
 from Spritesheet import Spritesheet
 from utils import *
-from dialogue import Dialogue
 from npc import NPC
 
 
@@ -18,20 +17,6 @@ pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-
-# def get_direction(keys):
-#     direction = Vector2(0, 0)
-#     if keys[K_RIGHT] or keys[K_d]:
-#         direction.x += self.camera_speed
-#     if keys[K_LEFT] or keys[K_a]:
-#         direction.x -= self.camera_speed
-#     if keys[K_UP] or keys[K_w]:
-#         direction.y -= self.camera_speed
-#     if keys[K_DOWN] or keys[K_s]:
-#         direction.y += self.camera_speed
-#     if direction.length() > 0:
-#         direction = direction.normalize()
-#     return direction
 
 class Camera:
     def __init__(self, obj):
@@ -95,10 +80,9 @@ class Game:
         player = Player()
         sprites.add(player)
 
-        # npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
-        #         for _ in range(NUM_NPCS)]
-        # for npc in npcs:
-        #     sprites.add(npc)
+        npcs = [NPC(*player.real_pos) for _ in range(NUM_NPCS)]
+        for npc in npcs:
+            sprites.add(npc)
 
         camera = Camera(player)
 
@@ -124,7 +108,9 @@ class Game:
             
             # Rendering
             self.render_tiles(camera)
-            screen.blit(player.image, player.rect)
+            # screen.blit(player.image, player.rect)
+            for sprite in sprites:
+                screen.blit(sprite.image, sprite.rect)
             pygame.display.flip()
             clock.tick(FPS)
 

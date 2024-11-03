@@ -6,10 +6,11 @@ from dialogue import Dialogue
 
 import pygame
 from pygame.math import Vector2
+import random
 
 NPC_CLEAR_QUEUE = 1
 
-class NPC(Character, pygame.sprite.Sprite):
+class NPC(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.real_pos = Vector2(x, y)
@@ -25,6 +26,6 @@ class NPC(Character, pygame.sprite.Sprite):
         self.actions.append(action)
     
     def update(self):
-        self.real_pos += (0.5, 0.5)
+        self.real_pos += (random.random(), random.random())
         self.rect = self.image.get_rect(center=self.real_pos)
 
