@@ -184,7 +184,7 @@ class Game:
                 if event.type == KEYDOWN:
                     if event.key == K_x:
                         player.attack()
-                        kills = self.get_collision(player, npcs)
+                        kills = self.get_collision(player, self.npcs)
                         if kills is not None:
                             kills.die()
             keys = pygame.key.get_pressed()
