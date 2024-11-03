@@ -9,7 +9,7 @@ import math
 from config import *
 from player import Player
 from Spritesheet import Spritesheet
-from utils import scale_image
+from utils import *
 
 
 pygame.init()
@@ -19,6 +19,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 class Game:
     def __init__(self):
+        self.in_dialogue = False
         self.music = pygame.mixer.Sound("assets/music/m.wav")
         self.music.play(-1)
 
@@ -94,25 +95,38 @@ class Game:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
+                #Dialogue toggler    
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        in_dialogue = not in_dialogue
+                        if in_dialogue:
+                            background_snapshot = screen.copy()
+                #End of dialogue toggler
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y * 0.3)
             keys = pygame.key.get_pressed()
+            #Dialogue
+            if in_dialogue:
+                screen.blit(background_snapshot(0,0))
+                multitext()
+                # pygame.draw.rect(screen,(255,255,255),(100,250,400,150))
+                # font = pygame.font.Font(None,36)
+                # dialogue_text = font.render("",True,(255,255,255))
+                # Player movement
+                player.move(keys)
+                
+                # Camera movement
+                self.update_camera(keys, player.at_edge)
+                
+                player.update_zoom(self.zoom)
+                # Update sprites
+                sprites.update()
 
-            # Player movement
-            player.move(keys)
-            
-            # Camera movement
-            self.update_camera(keys, player.at_edge)
-            
-            player.update_zoom(self.zoom)
-            # Update sprites
-            sprites.update()
-
-            # Rendering
-            self.render_tiles()
-            screen.blit(player.image, player.rect)
-            pygame.display.flip()
-            clock.tick(FPS)
+                # Rendering
+                self.render_tiles()
+                screen.blit(player.image, player.rect)
+                pygame.display.flip()
+                clock.tick(FPS)
 
         pygame.quit()
 
