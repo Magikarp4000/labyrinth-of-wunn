@@ -50,9 +50,12 @@ class Camera:
 class Game:
     def __init__(self):
         self.in_dialogue = False
-        pygame.mixer.init()
-        self.music = pygame.mixer.Sound("assets/music/m.wav")
-        self.music.play(-1)
+        try:
+            pygame.mixer.init()
+            self.music = pygame.mixer.Sound("assets/music/m.wav")
+            self.music.play(-1)
+        except:
+            pass
 
         self.zoom = 1
 
@@ -65,9 +68,12 @@ class Game:
         self.wait = False
 
         self.nps = []
+        self.tiles, self.house_tiles = self.gen_world()
     
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
+        house_image = pygame.image.load('assets/Cute_Fantasy_Free/Outdoor decoration/House.png')
+        house_tiles = {}
         tiles = {}
         for i in range(WORLD_HEIGHT):
             for j in range(WORLD_WIDTH):
@@ -77,7 +83,23 @@ class Game:
                     y = random.randint(0, tilesheet.h - 1)
                 tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
                 tiles[i, j] = tile
-        return tiles
+        num_houses = 10
+        for h1 in range(num_houses):
+            while True:
+                x,y = random.randint(15,WORLD_WIDTH-16), random.randint(10,WORLD_HEIGHT-11)
+                collision = False
+                for i5 in range(x-8,x+8):
+                    for i6 in range(y-8,y+8):
+                        if (i5,i6) in house_tiles:
+                            collision = True
+                        if collision == False:
+                            house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
+                            house_tiles[x,y] = house_image
+                        break
+                    break
+                break
+        return tiles, house_tiles
+
 
     def render_tiles(self, camera):
         for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
@@ -88,16 +110,22 @@ class Game:
                 pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
                 pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
                 screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
+        for x in range(int(camera.tl.x) - 10, int(camera.br.x) + WIDTH + 10):
+            for y in range(int(camera.tl.y) - 10, int(camera.br.y) + HEIGHT + 10):
+                if (x, y) in self.house_tiles:
+                    self.house_tiles[x, y] = pygame.transform.scale(self.house_tiles[x,y], (HOUSE_WIDTH*self.zoom,HOUSE_HEIGHT*self.zoom))
+                    pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                    pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                    screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
     
     def render_npcs(self, camera):
-        for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
-            for y in range(int(camera.tl.y), int(camera.br.y) + HEIGHT + 1):
-                if (y, x) not in self.tiles:
-                    continue
-                self.npcs[y, x] = scale_image(self.npcs[y, x], self.tile_size)
-                pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
-                pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
-                screen.blit(self.npcs[y, x], self.npcs[y, x].get_rect(center=(pos_x, pos_y)))
+        for idx, npc in enumerate(self.npcs):
+            if (camera.tl.x <= npc.real_pos.x and camera.br.x >= npc.real_pos.x and
+                camera.tl.y <= npc.real_pos.y and camera.br.y >= npc.real_pos.y):
+                npc.image = scale_image(npc.image, BASE_PLAYER_SIZE * self.zoom)
+                pos_x = camera.pos.x - (camera.real_pos.x - npc.real_pos.x) * self.tile_size
+                pos_y = camera.pos.y - (camera.real_pos.y - npc.real_pos.y) * self.tile_size
+                screen.blit(npc.image, npc.image.get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
         self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
@@ -151,6 +179,9 @@ class Game:
                 if event.type == KEYDOWN:
                     if event.key == K_x:
                         player.attack()
+                        kills = self.get_collision(player, self.npcs)
+                        if kills is not None:
+                            kills.die()
             keys = pygame.key.get_pressed()
             # In dialogue
             if self.in_dialogue and not self.in_typing:
@@ -187,8 +218,11 @@ class Game:
 
                 # Rendering
                 self.render_tiles(camera)
-                for sprite in sprites:
-                    screen.blit(sprite.image, sprite.rect)
+                self.render_npcs(camera)
+
+                screen.blit(player.image, player.rect)
+                # for sprite in sprites:
+                #     screen.blit(sprite.image, sprite.rect)
             
             #Rendering
             pygame.display.flip()

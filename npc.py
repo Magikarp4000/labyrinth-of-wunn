@@ -20,6 +20,7 @@ class NPC(pygame.sprite.Sprite):
         self.sus = 0
         self.actions = deque()
         self.dialogue = None
+        self.killed = False
         self.health = 100
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
@@ -28,13 +29,15 @@ class NPC(pygame.sprite.Sprite):
         self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]), Animation(spritesheet, 5, [42, 43, 44, 45]))
         self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
 
+        self.killanim = Animation(spritesheet, 20, [36, 37, 38] + [39] * 100)
+
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
         self.size = BASE_PLAYER_SIZE
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        # self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
@@ -42,6 +45,12 @@ class NPC(pygame.sprite.Sprite):
         self.actions.append(action)
     
     def update(self):
+        if self.killed:
+            img = self.killanim.get_image(0)
+            self.image = scale_image(img, self.size)
+            self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+            return
+        
         self.real_pos += (0.1, 0.1)
 
         ii = 0
@@ -57,3 +66,10 @@ class NPC(pygame.sprite.Sprite):
             img = self.down[ii].get_image(0)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+    
+    def die(self):
+        print("die die die")
+        img = self.killanim.get_image(0)
+        self.image = scale_image(img, self.size)
+        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.killed = True
