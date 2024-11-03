@@ -9,7 +9,7 @@ import math
 from config import *
 from Player import Player
 from Spritesheet import Spritesheet
-from utils import scale_image
+from utils import *
 from dialogue import Dialogue
 from npc import NPC
 
@@ -97,11 +97,10 @@ class Game:
 
         # npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
         #         for _ in range(NUM_NPCS)]
-        # sprites.add(npcs)
+        # for npc in npcs:
+        #     sprites.add(npc)
 
         camera = Camera(player)
-
-        
 
         running = True
         while running:
@@ -122,7 +121,7 @@ class Game:
             
             # Update sprites
             sprites.update()
-
+            
             # Rendering
             self.render_tiles(camera)
             screen.blit(player.image, player.rect)
