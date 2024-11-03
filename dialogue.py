@@ -50,7 +50,7 @@ class Dialogue:
                 },
         ]
 
-        self.test("Hi! Briefly introduce yourself.")
+        # self.test("Hi! Briefly introduce yourself.")
 
 
     def test(self, prompt = None):
