@@ -30,7 +30,7 @@ class NPC(pygame.sprite.Sprite):
         self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]), Animation(spritesheet, 5, [42, 43, 44, 45]))
         self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
 
-        self.killanim = Animation(spritesheet, 20, [36, 37, 38] + [39] * 100)
+        self.killanim = Animation(spritesheet, 20, [36, 37, 38] + [39] * 8000)
 
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
