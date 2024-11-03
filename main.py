@@ -117,6 +117,9 @@ class Game:
                 #End of dialogue toggler
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y)
+                if event.type == KEYDOWN:
+                    if event.key == K_x:
+                        player.attack()
             keys = pygame.key.get_pressed()
             #Dialogue
             if self.in_dialogue:
