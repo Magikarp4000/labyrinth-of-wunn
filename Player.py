@@ -37,8 +37,12 @@ class Player(pygame.sprite.Sprite):
         self.moving = False
         self.knife = 0
 
+        self.swing = pygame.mixer.Sound("assets/music/07_human_atk_sword_1.wav")
+
     def attack(self):
         self.knife = 20
+        self.down[2].tick = self.right[2].tick = self.up[2].tick = 0
+        self.swing.play(0)
 
     def update_zoom(self, zoom):
         self.zoom = zoom
