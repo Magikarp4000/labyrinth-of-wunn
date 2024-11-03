@@ -36,6 +36,16 @@ class Camera:
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
         self.tl = self.real_pos - self.pos / BASE_TILE_SIZE
         self.br = self.real_pos + ((SCREEN_WIDTH, SCREEN_HEIGHT) - self.pos) / BASE_TILE_SIZE
+    
+    # def render_tiles(self, arr, tile_size):
+    #     for x in range(int(self.tl.x), int(self.br.x) + WIDTH + 1):
+    #         for y in range(int(self.tl.y), int(self.br.y) + HEIGHT + 1):
+    #             if (y, x) not in arr:
+    #                 continue
+    #             arr[y, x] = scale_image(arr[y, x], tile_size)
+    #             pos_x = self.pos.x - (self.real_pos.x - x) * tile_size
+    #             pos_y = self.pos.y - (self.real_pos.y - y) * tile_size
+    #             screen.blit(arr[y, x], arr[y, x].get_rect(center=(pos_x, pos_y)))
 
 class Game:
     def __init__(self):
@@ -51,6 +61,8 @@ class Game:
 
         self.in_dialogue = False
         self.wait = False
+
+        self.nps = []
     
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
@@ -74,6 +86,16 @@ class Game:
                 pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
                 pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
                 screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
+    
+    def render_npcs(self, camera):
+        for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
+            for y in range(int(camera.tl.y), int(camera.br.y) + HEIGHT + 1):
+                if (y, x) not in self.tiles:
+                    continue
+                self.npcs[y, x] = scale_image(self.npcs[y, x], self.tile_size)
+                pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                screen.blit(self.npcs[y, x], self.npcs[y, x].get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
         self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
@@ -95,8 +117,8 @@ class Game:
         player = Player()
         sprites.add(player)
 
-        npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
-        sprites.add(npcs)
+        self.npcs = pygame.sprite.Group([NPC(*player.real_pos)] * NUM_NPCS)
+        sprites.add(self.npcs)
 
         camera = Camera(player)
 
@@ -110,7 +132,7 @@ class Game:
                 #Dialogue toggler    
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        collide = self.get_collision(player, npcs)
+                        collide = self.get_collision(player, self.npcs)
                         if collide is not None:
                             print(collide)
                             self.in_dialogue = not self.in_dialogue
@@ -125,7 +147,6 @@ class Game:
             # In dialogue
             if self.in_dialogue:
                 if not self.wait:
-                    print("in dialogue uwu")
                     if collide.dialogue is None:
                         collide.dialogue = Dialogue()
                         response = collide.dialogue.test("Hi! Briefly introduce yourself.")

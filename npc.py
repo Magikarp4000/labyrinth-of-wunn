@@ -20,6 +20,7 @@ class NPC(pygame.sprite.Sprite):
         self.sus = 0
         self.actions = deque()
         self.dialogue = None
+        self.health = 100
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
 
@@ -35,7 +36,6 @@ class NPC(pygame.sprite.Sprite):
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
-
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
             self.actions.clear()
@@ -43,7 +43,6 @@ class NPC(pygame.sprite.Sprite):
     
     def update(self):
         self.real_pos += (0.1, 0.1)
-        self.pos = self.real_pos
 
         ii = 0
         self.orit = 0

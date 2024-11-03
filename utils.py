@@ -16,7 +16,7 @@ def multitext(text, x, y, w, spacing, font, font_size, colour, pos='topleft', an
     for i in range(1, len(text)):
         if font.size(text[prev: i])[0] >= w:
             lines.append(text[prev: i-1])
-            prev = i
+            prev = i-1
     lines.append(text[prev:])
     for line in lines:
         image = font.render(line, antialias, colour)
