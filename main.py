@@ -60,6 +60,8 @@ class Game:
         self.tiles = self.gen_world()
 
         self.in_dialogue = False
+        self.in_typing = False
+        self.typed_text = None
         self.wait = False
 
         self.nps = []
@@ -131,6 +133,12 @@ class Game:
                     running = False
                 #Dialogue toggler    
                 if event.type == pygame.KEYDOWN:
+                    if self.in_typing:
+                        if event.key == pygame.K_RETURN:
+                            self.in_typing = False
+                        else:
+                            self.typed_text += event.unicode
+                        continue
                     if event.key == pygame.K_SPACE:
                         collide = self.get_collision(player, self.npcs)
                         if collide is not None:
@@ -145,16 +153,25 @@ class Game:
                         player.attack()
             keys = pygame.key.get_pressed()
             # In dialogue
-            if self.in_dialogue:
+            if self.in_dialogue and not self.in_typing:
                 if not self.wait:
                     if collide.dialogue is None:
                         collide.dialogue = Dialogue()
                         response = collide.dialogue.test("Hi! Briefly introduce yourself.")
                     else:
-                        response = collide.dialogue.test(obtain_input())
-                self.display_text(detect_dialogue(response))
-                self.wait = True
+                        if self.typed_text is None:
+                            self.in_typing = True
+                            self.typed_text = ""
+                            response = None
+                        else:
+                            response = collide.dialogue.test(self.typed_text)
+                            self.typed_text = None
+                if response is not None:
+                    self.display_text(detect_dialogue(response))
+                    self.wait = True
             # Not in dialogue
+            elif self.in_typing:
+                self.display_text(self.typed_text)
             else:
                 # Player movement
                 player.move(keys)
