@@ -13,7 +13,7 @@ class Dialogue:
                 "role": "system",
                 "content": '''You are an NPC in a game with the following context:
                 You are living in a big city.
-                In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'.
+                In your city, you have the following available locations: 'shop', 'cafe', 'haunted house', 'office' and 'cinema'.
                 Generate a personality for the NPC.
                 '''
             },
@@ -42,7 +42,7 @@ class Dialogue:
                     The JSON schema should include
 {
   "action": {
-    "location": "string (null, shop, office, alleyways, cafe)",
+    "location": "string (null, shop, office, haunted house, cinema, cafe)",
     "type": "string (null, walk, run, scream, suicide)"
   },
   "dialogue": "string"

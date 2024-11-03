@@ -1,9 +1,6 @@
 import json
+from config import *
 
-ACTION_WALK = 1
-ACTION_RUN = 2
-ACTION_SCREAM = 3
-ACTION_SUICIDE = 4
 
 class Action:
     def __init__(self):
@@ -26,6 +23,7 @@ def detect_action(reply):
             action.t = ACTION_SUICIDE
 
         action.location = obj['action']['location']
+        return action
     except:
         return Action()
 

@@ -40,21 +40,36 @@ class NPC(pygame.sprite.Sprite):
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
 
         self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
-        # self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.good_target = False
+
+        self.run = False
 
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
             self.actions.clear()
         self.actions.append(action)
 
-    def update(self):
+    def update(self, player_pos):
         if self.killed:
             img = self.killanim.get_image(0)
             self.image = scale_image(img, self.size)
             self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
             return
         
-        self.real_pos += (self.target - self.real_pos).normalize() * self.speed
+        if self.real_pos == self.target or not self.good_target:
+            if random.random() < RANDOM_CHANCE:
+                self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
+        
+        if self.real_pos == self.target:
+            self.good_target = False
+
+        if self.run:
+            self.real_pos += -(player_pos - self.real_pos).normalize() * self.speed
+            if random.random() < RANDOM_WALK_CHANCE:
+                self.run = False
+                self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
+        else:
+            self.real_pos += (self.target - self.real_pos).normalize() * self.speed
 
         ii = 0
         self.orit = 0
@@ -71,7 +86,6 @@ class NPC(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
     
     def die(self):
-        print("die die die")
         img = self.killanim.get_image(0)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))

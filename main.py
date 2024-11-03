@@ -13,6 +13,7 @@ from utils import *
 from dialogue import Dialogue
 from npc import NPC
 from action import detect_dialogue, detect_action
+from action import *
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -121,6 +122,10 @@ class Game:
                     pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
                     pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
                     screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
+                    for location in self.locations:
+                        if self.locations[location] == (x, y):
+                            images, rects = multitext(location.title(), pos_x - self.tile_size / 2, pos_y - self.tile_size * 3, SCREEN_WIDTH, DIALOGUE_YSPACING, 'Arial', FONT_SIZE, BLACK)
+                            screen.blit(images[0], rects[0])
     
     def render_npcs(self, camera):
         for npc in self.npcs:
@@ -169,6 +174,8 @@ class Game:
                     if self.in_typing:
                         if event.key == pygame.K_RETURN:
                             self.in_typing = False
+                        elif event.key == pygame.K_BACKSPACE:
+                            self.typed_text = self.typed_text[:-1]
                         else:
                             self.typed_text += event.unicode
                         continue
@@ -205,7 +212,17 @@ class Game:
                 if response is not None:
                     self.display_text(detect_dialogue(response))
                     action = detect_action(response)
-                    collide.target = self.locations[action.location]
+                    if action.location in self.locations:
+                        collide.good_target = True
+                        collide.target = self.locations[action.location]
+                    if action.t == ACTION_RUN or action.t == ACTION_SCREAM:
+                        collide.run = True
+                        collide.speed = BASE_NPC_RUN_SPEED / BASE_TILE_SIZE
+                    elif action.t == ACTION_WALK:
+                        collide.run = False
+                        collide.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
+                    elif action.t == ACTION_SUICIDE:
+                        collide.die()
                     self.wait = True
             # Not in dialogue
             elif self.in_typing:
@@ -221,7 +238,7 @@ class Game:
                 player.update_zoom(self.zoom)
 
                 # Update sprites
-                sprites.update()
+                sprites.update(player.real_pos)
 
                 # Rendering
                 self.render_tiles(camera)

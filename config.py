@@ -17,8 +17,8 @@ WORLD_WIDTH = 70
 WORLD_HEIGHT = 50
 
 # Screen size
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 450
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 
 # Num of tiles displayed on screen
 WIDTH = math.ceil(SCREEN_WIDTH / BASE_TILE_SIZE)
@@ -35,7 +35,10 @@ MAX_ZOOM = 5
 ZOOM_RATE = 0.5
 
 NUM_NPCS = 1
-BASE_NPC_SPEED = 2
+BASE_NPC_SPEED = 1.5
+BASE_NPC_RUN_SPEED = 4
+RANDOM_CHANCE = 0.01
+RANDOM_WALK_CHANCE = 0.003
 
 #Dialogue
 DIALOGUE_X = SCREEN_WIDTH / 20
@@ -46,4 +49,9 @@ HOUSE_HEIGHT = 168
 
 FONT_SIZE = 25
 
-LOCATIONS = ['shop', 'office', 'haunted house', 'cafe']
+LOCATIONS = ['shop', 'office', 'haunted house', 'cinema', 'cafe']
+
+ACTION_WALK = 1
+ACTION_RUN = 2
+ACTION_SCREAM = 3
+ACTION_SUICIDE = 4
