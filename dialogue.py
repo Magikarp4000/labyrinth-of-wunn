@@ -65,6 +65,7 @@ class Dialogue:
             top_p=1,
             stop=None,
             stream=False,
+            response_format={"type": "json_object"}
         )
         x = chat_completion.choices[0].message.content
         self.memory.append({
@@ -76,4 +77,4 @@ class Dialogue:
 if __name__ == '__main__':
     d = Dialogue()
     while True:
-        d.test()
+        print(d.test())
