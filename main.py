@@ -111,6 +111,9 @@ class Game:
                     running = False
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y)
+                if event.type == KEYDOWN:
+                    if event.key == K_x:
+                        player.attack()
             keys = pygame.key.get_pressed()
 
             # Player movement

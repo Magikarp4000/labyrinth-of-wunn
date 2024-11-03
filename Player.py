@@ -24,9 +24,9 @@ class Player(pygame.sprite.Sprite):
 
         spritesheet = Spritesheet("assets/Player/Player.png", 32)
 
-        self.down = (Animation(spritesheet, 5, [18, 19, 20, 21, 22, 23]), Animation(spritesheet, 5, [0]))
-        self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]))
-        self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]))
+        self.down = (Animation(spritesheet, 5, [18, 19, 20, 21, 22, 23]), Animation(spritesheet, 5, [0]), Animation(spritesheet, 5, [36, 37, 38, 39]))
+        self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]), Animation(spritesheet, 5, [42, 43, 44, 45]))
+        self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
@@ -35,6 +35,10 @@ class Player(pygame.sprite.Sprite):
 
         self.tick = 0
         self.moving = False
+        self.knife = 0
+
+    def attack(self):
+        self.knife = 20
 
     def update_zoom(self, zoom):
         self.zoom = zoom
@@ -83,16 +87,20 @@ class Player(pygame.sprite.Sprite):
             self.moving = True
     
     def update(self, *args, **kwargs):
+        ii = not self.moving
+        if self.knife > 0:
+            ii = 2
         if self.orit == 0:
-            img = self.right[not self.moving].get_image(self.tick)
+            img = self.right[ii].get_image(self.tick)
         if self.orit == 1:
-            img = self.up[not self.moving].get_image(self.tick)
+            img = self.up[ii].get_image(self.tick)
         if self.orit == 2:
-            img = self.right[not self.moving].get_image(self.tick)
+            img = self.right[ii].get_image(self.tick)
             img = pygame.transform.flip(img, 1, 0)
         if self.orit == 3:
-            img = self.down[not self.moving].get_image(self.tick)
+            img = self.down[ii].get_image(self.tick)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
         self.tick += 1
         self.moving = False
+        self.knife -= 1
