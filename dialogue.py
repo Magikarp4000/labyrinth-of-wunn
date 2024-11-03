@@ -8,10 +8,37 @@ class Dialogue:
             self.key = f['groq']['api_key']
         self.client = Groq(api_key=self.key)
 
+        get_background = self.client.chat.completions.create(
+            messages=[{
+                "role": "system",
+                "content": '''You are an NPC in a game with the following context:
+                You are living in a big city.
+                In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'.
+                Generate a personality for the NPC.
+                '''
+            }, 
+            {
+                "role": "user",
+                "content": '''Print 3 short sentences of around 10 words, that will be passed on as input to another LLM, that describes the personality of the character.
+                Just print the 3 phrases; don't print anything else.'''
+            }],
+            model="llama-3.1-8b-instant",
+            temperature=1.25,
+            max_tokens=2048,
+            top_p=1,
+            stop=None,
+            stream=False,
+        )
+
+        player_background = get_background.choices[0].message.content
+
         self.memory = [
                 {
                     "role": "system",
-                    'content': '''You are living in a big city with murders on the run. In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'. You are a 30 year old man and you need to answer in JSON format. Make sure every reply is one sentence or so, as if in a realistic conversation. You are currently in bed in the morning 9:30am about to get up.
+                    'content': "Your personality can be described as follows: " + player_background +
+                    '''You are living in a big city with a murderer on the run.
+                    In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'.
+                    You need to answer in JSON format. Make sure every reply is one sentence or so, as if in a realistic conversation.
                     The JSON schema should include
 {
   "action": {
@@ -23,11 +50,15 @@ class Dialogue:
                 },
         ]
 
-    def test(self):
-        i = input()
+        self.test("Hi! Briefly introduce yourself.")
+
+
+    def test(self, prompt = None):
+        if prompt == None:
+            prompt = input()
         self.memory.append({
                 "role": "user",
-                "content": i,
+                "content": prompt,
         })
         chat_completion = self.client.chat.completions.create(
             messages=self.memory,
