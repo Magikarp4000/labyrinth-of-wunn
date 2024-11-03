@@ -71,6 +71,13 @@ class Game:
         self.nps = []
         self.tiles, self.house_tiles, self.locations = self.gen_world()
     
+    def check_house(self, x, y, house_tiles):
+        for i5 in range(x-4,x+4):
+            for i6 in range(y-4,y+4):
+                if (i5,i6) in house_tiles:
+                    return True
+        return False
+
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
         house_image = pygame.image.load('assets/Cute_Fantasy_Free/Outdoor decoration/House.png')
@@ -85,21 +92,13 @@ class Game:
                     y = random.randint(0, tilesheet.h - 1)
                 tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
                 tiles[i, j] = tile
-        num_houses = 10
-        for h1 in range(num_houses):
+        for h1 in range(NUM_HOUSES):
             while True:
                 x,y = random.randint(15,WORLD_WIDTH-16), random.randint(10,WORLD_HEIGHT-11)
-                collision = False
-                for i5 in range(x-8,x+8):
-                    for i6 in range(y-8,y+8):
-                        if (i5,i6) in house_tiles:
-                            collision = True
-                        if collision == False:
-                            house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
-                            house_tiles[x,y] = house_image
-                        break
+                if not self.check_house(x, y, house_tiles):
+                    house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
+                    house_tiles[x,y] = house_image
                     break
-                break
         special_houses = random.sample(list(house_tiles.keys()), len(LOCATIONS))
         for idx, house in enumerate(special_houses):
             house_locations[LOCATIONS[idx]] = house
@@ -186,7 +185,6 @@ class Game:
                     if event.key == pygame.K_SPACE:
                         collide = self.get_collision(player, self.npcs)
                         if collide is not None:
-                            print(collide)
                             self.in_dialogue = not self.in_dialogue
                             self.wait = False
                 #End of dialogue toggler

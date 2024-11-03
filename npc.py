@@ -58,7 +58,7 @@ class NPC(pygame.sprite.Sprite):
         
         if self.real_pos == self.target or not self.good_target:
             if random.random() < RANDOM_CHANCE:
-                self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
+                self.target = Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
         
         if self.real_pos == self.target:
             self.good_target = False
