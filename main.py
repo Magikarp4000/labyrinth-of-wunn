@@ -95,9 +95,9 @@ class Game:
         player = Player()
         sprites.add(player)
 
-        npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
-                for _ in range(NUM_NPCS)]
-        sprites.add(npcs)
+        # npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+        #         for _ in range(NUM_NPCS)]
+        # sprites.add(npcs)
 
         camera = Camera(player)
 

@@ -24,5 +24,6 @@ class NPC(Character):
         self.actions.append(action)
     
     def update(self):
+        self.real_pos += (0.5, 0.5)
         self.rect = self.image.get_rect(center=self.real_pos)
-        
+
