@@ -1,4 +1,5 @@
 from config import *
+from animation import Animation
 from utils import *
 
 import pygame
@@ -22,8 +23,18 @@ class Player(pygame.sprite.Sprite):
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
         spritesheet = Spritesheet("assets/Player/Player.png", 32)
+
+        self.down = (Animation(spritesheet, 5, [18, 19, 20, 21, 22, 23]), Animation(spritesheet, 5, [0]))
+        self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]))
+        self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]))
+
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+
+        self.orit = 0
+
+        self.tick = 0
+        self.moving = False
 
     def update_zoom(self, zoom):
         self.zoom = zoom
@@ -59,7 +70,29 @@ class Player(pygame.sprite.Sprite):
 
         self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH - 1)
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
+
+        if direction.x > 0:
+            self.orit = 0
+        elif direction.x < 0:
+            self.orit = 2
+        elif direction.y < 0:
+            self.orit = 1
+        elif direction.y > 0:
+            self.orit = 3
+        if abs(direction.x) + abs(direction.y) > 0:
+            self.moving = True
     
     def update(self, *args, **kwargs):
-        self.image = scale_image(self.image, self.size)
+        if self.orit == 0:
+            img = self.right[not self.moving].get_image(self.tick)
+        if self.orit == 1:
+            img = self.up[not self.moving].get_image(self.tick)
+        if self.orit == 2:
+            img = self.right[not self.moving].get_image(self.tick)
+            img = pygame.transform.flip(img, 1, 0)
+        if self.orit == 3:
+            img = self.down[not self.moving].get_image(self.tick)
+        self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.tick += 1
+        self.moving = False
