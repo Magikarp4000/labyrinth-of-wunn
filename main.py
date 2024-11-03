@@ -96,13 +96,11 @@ class Game:
         player = Player()
         sprites.add(player)
 
-        npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
-                for _ in range(NUM_NPCS)]
-        sprites.add(npcs)
+        # npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+        #         for _ in range(NUM_NPCS)]
+        # sprites.add(npcs)
 
         camera = Camera(player)
-
-        
 
         running = True
         while running:
@@ -113,20 +111,20 @@ class Game:
                 #Dialogue toggler    
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        in_dialogue = not in_dialogue
-                        if in_dialogue:
+                        self.in_dialogue = not self.in_dialogue
+                        if self.in_dialogue:
                             background_snapshot = screen.copy()
                 #End of dialogue toggler
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y)
             keys = pygame.key.get_pressed()
             #Dialogue
-            if in_dialogue:
-                screen.blit(background_snapshot(0,0))
-                multitext(DIALOGUE_X,DIALOGUE_Y,DIALOGUE_YSPACING,Sans,BLACK)
-                # pygame.draw.rect(screen,(255,255,255),(100,250,400,150))
-                # font = pygame.font.Font(None,36)
-                # dialogue_text = font.render("",True,(255,255,255))
+            if self.in_dialogue:
+                text_images, text_rects = multitext("Hello"*15,DIALOGUE_X,DIALOGUE_Y,SCREEN_WIDTH-(2*DIALOGUE_X), (SCREEN_HEIGHT-DIALOGUE_Y-20), DIALOGUE_YSPACING,'Arial',FONT_SIZE,BLACK)
+                screen.blit(background_snapshot, (0,0))
+                pygame.draw.rect(screen, (255,255,255), (DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), SCREEN_HEIGHT-DIALOGUE_Y-20))
+                for image, rect in zip(text_images, text_rects):
+                    screen.blit(image, rect)
             else:
                 # Player movement
                 player.move(keys)
