@@ -9,7 +9,7 @@ import math
 from config import *
 from Player import Player
 from Spritesheet import Spritesheet
-from utils import scale_image
+from utils import *
 from dialogue import Dialogue
 from npc import NPC
 
@@ -53,6 +53,7 @@ class Camera:
 
 class Game:
     def __init__(self):
+        self.in_dialogue = False
         pygame.mixer.init()
         self.music = pygame.mixer.Sound("assets/music/m.wav")
         self.music.play(-1)
@@ -101,34 +102,48 @@ class Game:
 
         camera = Camera(player)
 
-        
-
         running = True
         while running:
             # Event handling
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
+                #Dialogue toggler    
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.in_dialogue = not self.in_dialogue
+                        if self.in_dialogue:
+                            background_snapshot = screen.copy()
+                #End of dialogue toggler
                 if event.type == MOUSEWHEEL:
                     self.update_zoom(event.y)
                 if event.type == KEYDOWN:
                     if event.key == K_x:
                         player.attack()
             keys = pygame.key.get_pressed()
+            #Dialogue
+            if self.in_dialogue:
+                text_images, text_rects = multitext("Hello"*15,DIALOGUE_X,DIALOGUE_Y,SCREEN_WIDTH-(2*DIALOGUE_X), (SCREEN_HEIGHT-DIALOGUE_Y-20), DIALOGUE_YSPACING,'Arial',FONT_SIZE,BLACK)
+                screen.blit(background_snapshot, (0,0))
+                pygame.draw.rect(screen, (255,255,255), (DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), SCREEN_HEIGHT-DIALOGUE_Y-20))
+                for image, rect in zip(text_images, text_rects):
+                    screen.blit(image, rect)
+            else:
+                # Player movement
+                player.move(keys)
+                player.update_zoom(self.zoom)
 
-            # Player movement
-            player.move(keys)
-            player.update_zoom(self.zoom)
-            
-            # Camera movement
-            camera.update(self.zoom)
-            
-            # Update sprites
-            sprites.update()
+                # Camera movement
+                camera.update(self.zoom)
+                
+                player.update_zoom(self.zoom)
+                # Update sprites
+                sprites.update()
 
-            # Rendering
-            self.render_tiles(camera)
-            screen.blit(player.image, player.rect)
+                # Rendering
+                self.render_tiles(camera)
+                screen.blit(player.image, player.rect)
+            #Rendering
             pygame.display.flip()
             clock.tick(FPS)
 
