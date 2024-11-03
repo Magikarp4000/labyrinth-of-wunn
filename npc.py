@@ -43,7 +43,7 @@ class NPC(pygame.sprite.Sprite):
         if flags & NPC_CLEAR_QUEUE:
             self.actions.clear()
         self.actions.append(action)
-    
+
     def update(self):
         if self.killed:
             img = self.killanim.get_image(0)
@@ -51,7 +51,7 @@ class NPC(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
             return
         
-        self.real_pos += (0.1, 0.1)
+        self.real_pos += (0.03, 0.03)
 
         ii = 0
         self.orit = 0

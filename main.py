@@ -108,8 +108,8 @@ class Game:
                 pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
                 pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
                 screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
-        for x in range(int(camera.tl.x) - 10, int(camera.br.x) + WIDTH + 10):
-            for y in range(int(camera.tl.y) - 10, int(camera.br.y) + HEIGHT + 10):
+        for x in range(int(camera.tl.x) - 4, int(camera.br.x) + WIDTH + 4):
+            for y in range(int(camera.tl.y) - 4, int(camera.br.y) + HEIGHT + 4):
                 if (x, y) in self.house_tiles:
                     self.house_tiles[x, y] = pygame.transform.scale(self.house_tiles[x,y], (HOUSE_WIDTH*self.zoom,HOUSE_HEIGHT*self.zoom))
                     pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
@@ -117,12 +117,13 @@ class Game:
                     screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
     
     def render_npcs(self, camera):
-        for idx, npc in enumerate(self.npcs):
-            if (camera.tl.x <= npc.real_pos.x and camera.br.x >= npc.real_pos.x and
-                camera.tl.y <= npc.real_pos.y and camera.br.y >= npc.real_pos.y):
+        for npc in self.npcs:
+            if (camera.tl.x - 3 <= npc.real_pos.x and camera.br.x + 3 >= npc.real_pos.x and
+                camera.tl.y - 3 <= npc.real_pos.y and camera.br.y + 3 >= npc.real_pos.y):
                 npc.image = scale_image(npc.image, BASE_PLAYER_SIZE * self.zoom)
                 pos_x = camera.pos.x - (camera.real_pos.x - npc.real_pos.x) * self.tile_size
                 pos_y = camera.pos.y - (camera.real_pos.y - npc.real_pos.y) * self.tile_size
+                npc.pos = Vector2(pos_x, pos_y)
                 screen.blit(npc.image, npc.image.get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
