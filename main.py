@@ -7,9 +7,11 @@ import random
 import math
 
 from config import *
-from player import Player
+from Player import Player
 from Spritesheet import Spritesheet
 from utils import scale_image
+from dialogue import Dialogue
+from npc import NPC
 
 
 pygame.init()
@@ -37,6 +39,8 @@ class Camera:
         self.obj = obj
         self.pos = obj.pos
         self.real_pos = obj.real_pos / BASE_TILE_SIZE
+        self.tl = self.real_pos - self.pos / BASE_TILE_SIZE
+        self.br = self.real_pos + ((SCREEN_WIDTH, SCREEN_HEIGHT) - self.pos) / BASE_TILE_SIZE
     
     def update(self, zoom):
         self.zoom = zoom
@@ -44,6 +48,8 @@ class Camera:
         self.real_pos = self.obj.real_pos
         self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH - 1)
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
+        self.tl = self.real_pos - self.pos / BASE_TILE_SIZE
+        self.br = self.real_pos + ((SCREEN_WIDTH, SCREEN_HEIGHT) - self.pos) / BASE_TILE_SIZE
 
 class Game:
     def __init__(self):
@@ -70,13 +76,8 @@ class Game:
         return tiles
 
     def render_tiles(self, camera):
-        start_x = camera.real_pos.x - camera.pos.x / self.tile_size
-        end_x = camera.real_pos.x + (SCREEN_WIDTH - camera.pos.x) / self.tile_size
-        start_y = camera.real_pos.y - camera.pos.y / self.tile_size
-        end_y = camera.real_pos.y + (SCREEN_HEIGHT - camera.pos.y) / self.tile_size
-
-        for x in range(int(start_x), int(end_x) + WIDTH + 1):
-            for y in range(int(start_y), int(end_y) + HEIGHT + 1):
+        for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
+            for y in range(int(camera.tl.y), int(camera.br.y) + HEIGHT + 1):
                 if (y, x) not in self.tiles:
                     continue
                 self.tiles[y, x] = scale_image(self.tiles[y, x], self.tile_size)
@@ -90,10 +91,17 @@ class Game:
 
     def main(self):
         sprites = pygame.sprite.Group()
+
         player = Player()
         sprites.add(player)
 
+        npcs = [NPC(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+                for _ in range(NUM_NPCS)]
+        sprites.add(npcs)
+
         camera = Camera(player)
+
+        
 
         running = True
         while running:
