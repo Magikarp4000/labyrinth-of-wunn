@@ -7,7 +7,7 @@ import random
 import math
 
 from config import *
-from Player import Player
+from player import Player
 from Spritesheet import Spritesheet
 from utils import scale_image
 
