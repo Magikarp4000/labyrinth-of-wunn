@@ -16,7 +16,7 @@ class Dialogue:
                 In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'.
                 Generate a personality for the NPC.
                 '''
-            }, 
+            },
             {
                 "role": "user",
                 "content": '''Print 3 short sentences of around 10 words, that will be passed on as input to another LLM, that describes the personality of the character.
@@ -74,7 +74,6 @@ class Dialogue:
         return x
 
 if __name__ == '__main__':
-    pass
-    # d = Dialogue()
-    # while True:
-    #     d.test()
+    d = Dialogue()
+    while True:
+        d.test()

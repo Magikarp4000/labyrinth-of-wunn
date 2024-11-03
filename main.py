@@ -12,7 +12,7 @@ from Spritesheet import Spritesheet
 from utils import *
 from dialogue import Dialogue
 from npc import NPC
-
+from action import detect_dialogue
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -130,8 +130,8 @@ class Game:
                         collide.dialogue = Dialogue()
                         response = collide.dialogue.test("Hi! Briefly introduce yourself.")
                     else:
-                        response = collide.dialogue.test(input())
-                self.display_text(response)
+                        response = collide.dialogue.test(obtain_input())
+                self.display_text(detect_dialogue(response))
                 self.wait = True
             # Not in dialogue
             else:

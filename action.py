@@ -13,8 +13,8 @@ class Action:
         self.location = None
 
 def detect_action(reply):
-    obj = json.loads(reply)
     try:
+        obj = json.loads(reply)
         action = Action()
         if obj['action']['type'] == 'walk':
             action.t = ACTION_WALK
@@ -27,4 +27,11 @@ def detect_action(reply):
 
         action.location = obj['action']['location']
     except:
-        return None
+        return Action()
+
+def detect_dialogue(reply):
+    try:
+        obj = json.loads(reply)
+        return obj['dialogue']
+    except:
+        return "Bye bye!"
