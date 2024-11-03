@@ -50,9 +50,6 @@ class Dialogue:
                 },
         ]
 
-        # self.test("Hi! Briefly introduce yourself.")
-
-
     def test(self, prompt = None):
         if prompt == None:
             prompt = input()
@@ -70,13 +67,14 @@ class Dialogue:
             stream=False,
         )
         x = chat_completion.choices[0].message.content
-        print(x)
         self.memory.append({
             'role': 'assistant',
             'content': x
         })
+        return x
 
 if __name__ == '__main__':
-    d = Dialogue()
-    while True:
-        d.test()
+    pass
+    # d = Dialogue()
+    # while True:
+    #     d.test()
