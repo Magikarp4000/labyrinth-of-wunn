@@ -17,8 +17,8 @@ WORLD_WIDTH = 70
 WORLD_HEIGHT = 50
 
 # Screen size
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 450
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 
 # Num of tiles displayed on screen
 WIDTH = math.ceil(SCREEN_WIDTH / BASE_TILE_SIZE)

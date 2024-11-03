@@ -165,6 +165,8 @@ class Game:
                     if self.in_typing:
                         if event.key == pygame.K_RETURN:
                             self.in_typing = False
+                        elif event.key == pygame.K_BACKSPACE:
+                            self.typed_text = self.typed_text[:-1]
                         else:
                             self.typed_text += event.unicode
                         continue
