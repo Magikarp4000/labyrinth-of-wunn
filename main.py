@@ -40,9 +40,12 @@ class Camera:
 class Game:
     def __init__(self):
         self.in_dialogue = False
-        pygame.mixer.init()
-        self.music = pygame.mixer.Sound("assets/music/m.wav")
-        self.music.play(-1)
+        try:
+            pygame.mixer.init()
+            self.music = pygame.mixer.Sound("assets/music/m.wav")
+            self.music.play(-1)
+        except:
+            pass
 
         self.zoom = 1
 
@@ -121,6 +124,9 @@ class Game:
                 if event.type == KEYDOWN:
                     if event.key == K_x:
                         player.attack()
+                        kills = self.get_collision(player, npcs)
+                        if kills is not None:
+                            kills.die()
             keys = pygame.key.get_pressed()
             # In dialogue
             if self.in_dialogue:

@@ -20,12 +20,15 @@ class NPC(pygame.sprite.Sprite):
         self.sus = 0
         self.actions = deque()
         self.dialogue = None
+        self.killed = False
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
 
         self.down = (Animation(spritesheet, 5, [18, 19, 20, 21, 22, 23]), Animation(spritesheet, 5, [0]), Animation(spritesheet, 5, [36, 37, 38, 39]))
         self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]), Animation(spritesheet, 5, [42, 43, 44, 45]))
         self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
+
+        self.killanim = Animation(spritesheet, 20, [36, 37, 38] + [39] * 100)
 
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -42,6 +45,12 @@ class NPC(pygame.sprite.Sprite):
         self.actions.append(action)
     
     def update(self):
+        if self.killed:
+            img = self.killanim.get_image(0)
+            self.image = scale_image(img, self.size)
+            self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+            return
+        
         self.real_pos += (0.1, 0.1)
         self.pos = self.real_pos
 
@@ -58,3 +67,10 @@ class NPC(pygame.sprite.Sprite):
             img = self.down[ii].get_image(0)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+    
+    def die(self):
+        print("die die die")
+        img = self.killanim.get_image(0)
+        self.image = scale_image(img, self.size)
+        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.killed = True
