@@ -88,14 +88,13 @@ class Game:
                 screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
     
     def render_npcs(self, camera):
-        for x in range(int(camera.tl.x), int(camera.br.x) + WIDTH + 1):
-            for y in range(int(camera.tl.y), int(camera.br.y) + HEIGHT + 1):
-                if (y, x) not in self.tiles:
-                    continue
-                self.npcs[y, x] = scale_image(self.npcs[y, x], self.tile_size)
-                pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
-                pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
-                screen.blit(self.npcs[y, x], self.npcs[y, x].get_rect(center=(pos_x, pos_y)))
+        for idx, npc in enumerate(self.npcs):
+            if (camera.tl.x <= npc.real_pos.x and camera.br.x >= npc.real_pos.x and
+                camera.tl.y <= npc.real_pos.y and camera.br.y >= npc.real_pos.y):
+                npc.image = scale_image(npc.image, BASE_PLAYER_SIZE * self.zoom)
+                pos_x = camera.pos.x - (camera.real_pos.x - npc.real_pos.x) * self.tile_size
+                pos_y = camera.pos.y - (camera.real_pos.y - npc.real_pos.y) * self.tile_size
+                screen.blit(npc.image, npc.image.get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
         self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
@@ -170,8 +169,11 @@ class Game:
 
                 # Rendering
                 self.render_tiles(camera)
-                for sprite in sprites:
-                    screen.blit(sprite.image, sprite.rect)
+                self.render_npcs(camera)
+
+                screen.blit(player.image, player.rect)
+                # for sprite in sprites:
+                #     screen.blit(sprite.image, sprite.rect)
             
             #Rendering
             pygame.display.flip()

@@ -34,7 +34,7 @@ class NPC(pygame.sprite.Sprite):
         self.size = BASE_PLAYER_SIZE
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        # self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
@@ -42,7 +42,7 @@ class NPC(pygame.sprite.Sprite):
         self.actions.append(action)
     
     def update(self):
-        self.real_pos += (0.1, 0.1)
+        self.real_pos += (0.03, 0.03)
 
         ii = 0
         self.orit = 0
@@ -56,4 +56,4 @@ class NPC(pygame.sprite.Sprite):
         if self.orit == 3:
             img = self.down[ii].get_image(0)
         self.image = scale_image(img, self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        # self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
