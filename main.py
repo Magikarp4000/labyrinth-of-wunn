@@ -100,6 +100,7 @@ class Game:
 
         camera = Camera(player)
 
+        response = ""
         running = True
         while running:
             # Event handling
@@ -110,8 +111,8 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         collide = self.get_collision(player, npcs)
-                        print(collide)
                         if collide is not None:
+                            print(collide)
                             self.in_dialogue = not self.in_dialogue
                             self.wait = False
                 #End of dialogue toggler
@@ -124,13 +125,12 @@ class Game:
             # In dialogue
             if self.in_dialogue:
                 if not self.wait:
+                    print("in dialogue uwu")
                     if collide.dialogue is None:
                         collide.dialogue = Dialogue()
                         response = collide.dialogue.test("Hi! Briefly introduce yourself.")
-                        input()
                     else:
                         response = collide.dialogue.test(input())
-                print("ilovemagikarp")
                 self.display_text(response)
                 self.wait = True
             # Not in dialogue
