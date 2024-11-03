@@ -39,6 +39,7 @@ class Player(pygame.sprite.Sprite):
 
     def attack(self):
         self.knife = 20
+        self.down[2].tick = self.right[2].tick = self.up[2].tick = 0
 
     def update_zoom(self, zoom):
         self.zoom = zoom
