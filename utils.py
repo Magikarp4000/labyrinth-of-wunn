@@ -1,13 +1,16 @@
 import pygame
 
 
+pygame.font.init()
+
 def scale_image(image, size):
     return pygame.transform.scale(image, (size, size))
 
-def multitext(text, x, y, spacing, font, colour, pos='topleft', antialias=False):
+def multitext(text, x, y, spacing, font, font_size, colour, pos='topleft', antialias=False):
     images = []
     rects = []
 
+    font = pygame.font.SysFont(font, font_size)
     lines = text.split("\n")
     for line in lines:
         image = font.render(line, antialias, colour)
