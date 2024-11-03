@@ -17,33 +17,45 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
+# def get_direction(keys):
+#     direction = Vector2(0, 0)
+#     if keys[K_RIGHT] or keys[K_d]:
+#         direction.x += self.camera_speed
+#     if keys[K_LEFT] or keys[K_a]:
+#         direction.x -= self.camera_speed
+#     if keys[K_UP] or keys[K_w]:
+#         direction.y -= self.camera_speed
+#     if keys[K_DOWN] or keys[K_s]:
+#         direction.y += self.camera_speed
+#     if direction.length() > 0:
+#         direction = direction.normalize()
+#     return direction
+
+class Camera:
+    def __init__(self, obj):
+        self.zoom = 1
+        self.obj = obj
+        self.pos = obj.pos
+        self.real_pos = obj.real_pos / BASE_TILE_SIZE
+    
+    def update(self, zoom):
+        self.zoom = zoom
+        self.pos = self.obj.pos
+        self.real_pos = self.obj.real_pos
+        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH - 1)
+        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
+
 class Game:
     def __init__(self):
+        pygame.mixer.init()
         self.music = pygame.mixer.Sound("assets/music/m.wav")
         self.music.play(-1)
 
         self.zoom = 1
-        self.tile_size = BASE_TILE_SIZE
-        self.camera_speed = BASE_CAMERA_SPEED
 
-        self.camera = Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2)
-        self.camera_pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.tile_size = BASE_TILE_SIZE
         self.tiles = self.gen_world()
     
-    def move_camera(self, pressed):
-        direction = Vector2(0, 0)
-        if pressed[K_RIGHT] or pressed[K_d]:
-            direction.x += self.camera_speed
-        if pressed[K_LEFT] or pressed[K_a]:
-            direction.x -= self.camera_speed
-        if pressed[K_UP] or pressed[K_w]:
-            direction.y -= self.camera_speed
-        if pressed[K_DOWN] or pressed[K_s]:
-            direction.y += self.camera_speed
-        if direction.length() > 0:
-            direction = direction.normalize()
-        return direction
-
     def gen_world(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
         tiles = {}
@@ -57,36 +69,31 @@ class Game:
                 tiles[i, j] = tile
         return tiles
 
-    def render_tiles(self):
-        start_x = self.camera.x - self.camera_pos.x / self.tile_size
-        end_x = self.camera.x + (SCREEN_WIDTH - self.camera_pos.x) / self.tile_size
-        start_y = self.camera.y - self.camera_pos.y / self.tile_size
-        end_y = self.camera.y + (SCREEN_HEIGHT - self.camera_pos.y) / self.tile_size
+    def render_tiles(self, camera):
+        start_x = camera.real_pos.x - camera.pos.x / self.tile_size
+        end_x = camera.real_pos.x + (SCREEN_WIDTH - camera.pos.x) / self.tile_size
+        start_y = camera.real_pos.y - camera.pos.y / self.tile_size
+        end_y = camera.real_pos.y + (SCREEN_HEIGHT - camera.pos.y) / self.tile_size
 
         for x in range(int(start_x), int(end_x) + WIDTH + 1):
             for y in range(int(start_y), int(end_y) + HEIGHT + 1):
+                if (y, x) not in self.tiles:
+                    continue
                 self.tiles[y, x] = scale_image(self.tiles[y, x], self.tile_size)
-                pos_x = self.camera_pos.x - (self.camera.x - x) * self.tile_size
-                pos_y = self.camera_pos.y - (self.camera.y - y) * self.tile_size
-                screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(topleft=(pos_x, pos_y)))
+                pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
+                pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
+                screen.blit(self.tiles[y, x], self.tiles[y, x].get_rect(center=(pos_x, pos_y)))
 
     def update_zoom(self, d_zoom):
-        self.zoom = clamp(self.zoom + d_zoom, 1, MAX_ZOOM)
-        self.camera_speed = self.zoom * BASE_CAMERA_SPEED
+        self.zoom = clamp(self.zoom + d_zoom * ZOOM_RATE, 1, MAX_ZOOM)
         self.tile_size = self.zoom * BASE_TILE_SIZE
-
-    def update_camera(self, keys, at_edge):
-        direction = self.move_camera(keys)
-        if at_edge:
-            self.camera_pos += direction * self.camera_speed
-            self.camera_pos.x = clamp(self.camera_pos.x, 0, WORLD_WIDTH - WIDTH - 1)
-            self.camera_pos.y = clamp(self.camera_pos.y, 0, WORLD_HEIGHT - HEIGHT - 1)
-        self.camera += direction * BASE_CAMERA_SPEED
 
     def main(self):
         sprites = pygame.sprite.Group()
         player = Player()
         sprites.add(player)
+
+        camera = Camera(player)
 
         running = True
         while running:
@@ -95,21 +102,21 @@ class Game:
                 if event.type == QUIT:
                     running = False
                 if event.type == MOUSEWHEEL:
-                    self.update_zoom(event.y * 0.3)
+                    self.update_zoom(event.y)
             keys = pygame.key.get_pressed()
 
             # Player movement
             player.move(keys)
+            player.update_zoom(self.zoom)
             
             # Camera movement
-            self.update_camera(keys, player.at_edge)
+            camera.update(self.zoom)
             
-            player.update_zoom(self.zoom)
             # Update sprites
             sprites.update()
 
             # Rendering
-            self.render_tiles()
+            self.render_tiles(camera)
             screen.blit(player.image, player.rect)
             pygame.display.flip()
             clock.tick(FPS)
