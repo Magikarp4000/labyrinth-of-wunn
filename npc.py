@@ -49,6 +49,9 @@ class NPC(pygame.sprite.Sprite):
             self.actions.clear()
         self.actions.append(action)
 
+    def random_target(self):
+        return Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+
     def update(self, player_pos):
         if self.killed:
             img = self.killanim.get_image(0)
@@ -58,7 +61,7 @@ class NPC(pygame.sprite.Sprite):
         
         if self.real_pos == self.target or not self.good_target:
             if random.random() < RANDOM_CHANCE:
-                self.target = Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+                self.target = self.random_target()
         
         if self.real_pos == self.target:
             self.good_target = False
@@ -68,6 +71,7 @@ class NPC(pygame.sprite.Sprite):
             if random.random() < RANDOM_WALK_CHANCE:
                 self.run = False
                 self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
+                self.target = self.random_target()
         else:
             self.real_pos += (self.target - self.real_pos).normalize() * self.speed
 
