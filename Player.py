@@ -85,14 +85,10 @@ class Player(pygame.sprite.Sprite):
         self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH - 1)
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
 
-        if direction.x > 0:
-            self.orit = 0
-        elif direction.x < 0:
-            self.orit = 2
-        elif direction.y < 0:
-            self.orit = 1
-        elif direction.y > 0:
-            self.orit = 3
+        
+        orit = get_orient_discrete(direction)
+        if orit is not None:
+            self.orit = orit
         if abs(direction.x) + abs(direction.y) > 0:
             self.moving = True
     

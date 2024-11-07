@@ -44,6 +44,8 @@ class NPC(pygame.sprite.Sprite):
 
         self.run = False
 
+        self.orit = 0
+
     def queue_action(self, action, flags):
         if flags & NPC_CLEAR_QUEUE:
             self.actions.clear()
@@ -66,25 +68,25 @@ class NPC(pygame.sprite.Sprite):
         if self.real_pos == self.target:
             self.good_target = False
 
+        direction = self.target - self.real_pos
         if self.run:
-            self.real_pos += -(player_pos - self.real_pos).normalize() * self.speed
+            direction = -(player_pos - self.real_pos)
             if random.random() < RANDOM_WALK_CHANCE:
                 self.run = False
                 self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
                 self.target = self.random_target()
-        else:
-            self.real_pos += (self.target - self.real_pos).normalize() * self.speed
+        self.real_pos += direction.normalize() * self.speed
 
+        self.orit = get_orient(direction)
         ii = 0
-        self.orit = 0
-        if self.orit == 0:
+        if self.orit == RIGHT:
             img = self.right[ii].get_image(0)
-        if self.orit == 1:
+        if self.orit == UP:
             img = self.up[ii].get_image(0)
-        if self.orit == 2:
+        if self.orit == LEFT:
             img = self.right[ii].get_image(0)
             img = pygame.transform.flip(img, 1, 0)
-        if self.orit == 3:
+        if self.orit == DOWN:
             img = self.down[ii].get_image(0)
         self.image = scale_image(img, self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))

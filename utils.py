@@ -1,4 +1,5 @@
 import pygame
+from config import *
 
 
 pygame.font.init()
@@ -35,3 +36,46 @@ def multitext(text, x, y, w, spacing, font, font_size, colour, pos='topleft', an
         y += spacing
     
     return images, rects
+
+def get_quandrant(direction):
+    if direction.x >= 0 and direction.y <= 0:
+        return 0
+    elif direction.x < 0 and direction.y <= 0:
+        return 1
+    elif direction.x < 0 and direction.y > 0:
+        return 2
+    else:
+        return 3
+
+def get_angle(direction):
+    if direction.x == 0:
+        return UP if direction.y < 0 else DOWN
+    angle = math.atan(-direction.y / direction.x) # -y cause up is -ve and we want +ve
+    quadrant = get_quandrant(direction)
+    if quadrant == 1:
+        angle += math.pi
+    elif quadrant == 2:
+        angle -= math.pi
+    return angle
+
+def get_orient(direction):
+    angle = get_angle(direction)
+    if MID_QUAD_3 < angle and angle <= MID_QUAD_0:
+        return RIGHT # right
+    elif MID_QUAD_0 < angle and angle <= MID_QUAD_1:
+        return UP # up
+    elif MID_QUAD_1 < angle or angle <= MID_QUAD_2:
+        return LEFT # left
+    else:
+        return DOWN # down
+
+def get_orient_discrete(direction):
+    if direction.x > 0:
+        return RIGHT
+    elif direction.y < 0:
+        return UP
+    elif direction.x < 0:
+        return LEFT
+    elif direction.y > 0:
+        return DOWN
+    return None
