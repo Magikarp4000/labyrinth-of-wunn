@@ -38,6 +38,7 @@ class NPC(pygame.sprite.Sprite):
         self.size = BASE_PLAYER_SIZE
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
+        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
         self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
         self.good_target = False
