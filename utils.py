@@ -4,6 +4,9 @@ from config import *
 
 pygame.font.init()
 
+def times(k, arr):
+    return tuple([x * k for x in arr])
+
 def scale_image(image, size):
     return pygame.transform.scale(image, (size, size))
 

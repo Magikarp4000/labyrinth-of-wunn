@@ -12,8 +12,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.speed = BASE_PLAYER_SPEED
-        self.size = BASE_PLAYER_SIZE
+        self.speed = PLAYER_SPEED
+        self.size = PLAYER_SIZE
 
         self.zoom = 1
 
@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.rect = self.image.get_rect(center=self.pos)
 
         self.orit = 0
 
@@ -50,10 +50,6 @@ class Player(pygame.sprite.Sprite):
         except:
             pass
 
-    def update_zoom(self, zoom):
-        self.zoom = zoom
-        self.size = BASE_PLAYER_SIZE * zoom
-
     def get_direction(self, keys):
         direction = Vector2(0, 0)
         if keys[K_s]:
@@ -67,31 +63,30 @@ class Player(pygame.sprite.Sprite):
         if direction.length() > 0:
             direction = direction.normalize()
         return direction
-
-    def move(self, keys):
+    
+    def move(self, keys, zoom):
         direction = self.get_direction(keys)
-        self.real_pos += direction * BASE_CAMERA_SPEED
-        self.pos += direction * self.speed * self.zoom
+        self.real_pos += direction * CAMERA_SPEED
+        self.pos += direction * self.speed * zoom
 
-        if (self.real_pos.x > CAMERA_PADDING_X / BASE_TILE_SIZE and
-            self.real_pos.x < WORLD_WIDTH - CAMERA_PADDING_X / BASE_TILE_SIZE):
+        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH)
+        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT)
+        
+        if (self.real_pos.x > CAMERA_PADDING_X / (TILE_SIZE * zoom) and
+            self.real_pos.x < WORLD_WIDTH - CAMERA_PADDING_X / (TILE_SIZE * zoom)):
             self.pos.x = clamp(self.pos.x, CAMERA_PADDING_X, SCREEN_WIDTH - CAMERA_PADDING_X)
-        if (self.real_pos.y > CAMERA_PADDING_Y / BASE_TILE_SIZE and 
-            self.real_pos.y < WORLD_HEIGHT - CAMERA_PADDING_Y / BASE_TILE_SIZE):
+        if (self.real_pos.y > CAMERA_PADDING_Y / (TILE_SIZE * zoom) and 
+            self.real_pos.y < WORLD_HEIGHT - CAMERA_PADDING_Y / (TILE_SIZE * zoom)):
             self.pos.y = clamp(self.pos.y, CAMERA_PADDING_Y, SCREEN_HEIGHT - CAMERA_PADDING_Y)
         self.pos.x = clamp(self.pos.x, 0, SCREEN_WIDTH)
         self.pos.y = clamp(self.pos.y, 0, SCREEN_HEIGHT)
-
-        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH - 1)
-        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT - 1)
-
         
         orit = get_orient_discrete(direction)
         if orit is not None:
             self.orit = orit
         if abs(direction.x) + abs(direction.y) > 0:
             self.moving = True
-    
+
     def update(self, *args, **kwargs):
         ii = not self.moving
         if self.knife > 0:
@@ -105,8 +100,10 @@ class Player(pygame.sprite.Sprite):
             img = pygame.transform.flip(img, 1, 0)
         if self.orit == 3:
             img = self.down[ii].get_image(self.tick)
-        self.image = scale_image(img, self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.image = img
+        # self.image = scale_image(img, PLAYER_SIZE)
+        # self.rect = self.image.get_rect(center=self.pos)
+
         self.tick += 1
         self.moving = False
         self.knife -= 1

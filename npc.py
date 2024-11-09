@@ -22,7 +22,7 @@ class NPC(pygame.sprite.Sprite):
         self.dialogue = None
         self.killed = False
         self.health = 100
-        self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
+        self.speed = NPC_SPEED / TILE_SIZE
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
 
@@ -35,7 +35,7 @@ class NPC(pygame.sprite.Sprite):
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
-        self.size = BASE_PLAYER_SIZE
+        self.size = PLAYER_SIZE
 
         self.image = scale_image(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
@@ -59,7 +59,7 @@ class NPC(pygame.sprite.Sprite):
         if self.killed:
             img = self.killanim.get_image(0)
             self.image = scale_image(img, self.size)
-            self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+            self.rect = self.image.get_rect(center=self.pos)
             return
         
         if self.real_pos == self.target or not self.good_target:
@@ -74,7 +74,7 @@ class NPC(pygame.sprite.Sprite):
             direction = -(player_pos - self.real_pos)
             if random.random() < RANDOM_WALK_CHANCE:
                 self.run = False
-                self.speed = BASE_NPC_SPEED / BASE_TILE_SIZE
+                self.speed = NPC_SPEED / TILE_SIZE
                 self.target = self.random_target()
         self.real_pos += direction.normalize() * self.speed
 
@@ -89,11 +89,8 @@ class NPC(pygame.sprite.Sprite):
             img = pygame.transform.flip(img, 1, 0)
         if self.orit == DOWN:
             img = self.down[ii].get_image(0)
-        self.image = scale_image(img, self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.image = img
     
     def die(self):
-        img = self.killanim.get_image(0)
-        self.image = scale_image(img, self.size)
-        self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
+        self.image = self.killanim.get_image(0)
         self.killed = True
