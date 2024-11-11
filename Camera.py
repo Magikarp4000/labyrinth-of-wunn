@@ -23,7 +23,32 @@ class Camera:
         self.zoom = clamp(self.zoom + delta_zoom * ZOOM_RATE, 1, MAX_ZOOM)
         self.tile_size = self.zoom * TILE_SIZE
 
+    def update_obj(self):
+        self.obj.real_pos.x = clamp(self.obj.real_pos.x, 0, WORLD_WIDTH)
+        self.obj.real_pos.y = clamp(self.obj.real_pos.y, 0, WORLD_HEIGHT)
+        
+        if (self.obj.real_pos.x > CAMERA_PADDING_X / self.tile_size and
+            self.obj.real_pos.x < WORLD_WIDTH - CAMERA_PADDING_X / self.tile_size):
+            self.obj.pos.x = clamp(self.obj.pos.x, CAMERA_PADDING_X, SCREEN_WIDTH - CAMERA_PADDING_X)
+        if self.obj.pos.x / self.tile_size >= self.obj.real_pos.x:
+            self.obj.pos.x = self.obj.real_pos.x * self.tile_size
+        if (SCREEN_WIDTH - self.obj.pos.x) / self.tile_size >= WORLD_WIDTH - self.obj.real_pos.x:
+            self.obj.pos.x = SCREEN_WIDTH - (WORLD_WIDTH - self.obj.real_pos.x) * self.tile_size
+        
+        if (self.obj.real_pos.y > CAMERA_PADDING_Y / self.tile_size and 
+            self.obj.real_pos.y < WORLD_HEIGHT - CAMERA_PADDING_Y / self.tile_size):
+            self.obj.pos.y = clamp(self.obj.pos.y, CAMERA_PADDING_Y, SCREEN_HEIGHT - CAMERA_PADDING_Y)
+        if self.obj.pos.y / self.tile_size >= self.obj.real_pos.y:
+            self.obj.pos.y = self.obj.real_pos.y * self.tile_size
+        if (SCREEN_HEIGHT - self.obj.pos.y) / self.tile_size >= WORLD_HEIGHT - self.obj.real_pos.y:
+            self.obj.pos.y = SCREEN_HEIGHT - (WORLD_HEIGHT - self.obj.real_pos.y) * self.tile_size
+
+        self.obj.pos.x = clamp(self.obj.pos.x, 0, SCREEN_WIDTH)
+        self.obj.pos.y = clamp(self.obj.pos.y, 0, SCREEN_HEIGHT)
+
     def update(self):
+        self.update_obj()
+
         self.pos = self.obj.pos
         self.real_pos = self.obj.real_pos
 

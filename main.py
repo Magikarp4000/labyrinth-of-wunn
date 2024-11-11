@@ -45,9 +45,9 @@ class Game:
         self.tiles, self.house_tiles, self.locations = self.gen_world()
     
     def check_house(self, x, y, house_tiles):
-        for i5 in range(x-4,x+4):
-            for i6 in range(y-4,y+4):
-                if (i5,i6) in house_tiles:
+        for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
+            for j in range(y - HOUSE_HEIGHT // TILE_SIZE, y + HOUSE_HEIGHT // TILE_SIZE):
+                if (i, j) in house_tiles:
                     return True
         return False
 
@@ -65,8 +65,8 @@ class Game:
                     y = random.randint(0, tilesheet.h - 1)
                 tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
                 tiles[i, j] = tile
-        for h1 in range(NUM_HOUSES):
-            while True:
+        for _ in range(NUM_HOUSES):
+            for _ in range(MAX_HOUSE_CHECK):
                 x,y = random.randint(15,WORLD_WIDTH-16), random.randint(10,WORLD_HEIGHT-11)
                 if not self.check_house(x, y, house_tiles):
                     house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
@@ -76,7 +76,6 @@ class Game:
         for idx, house in enumerate(special_houses):
             house_locations[LOCATIONS[idx]] = house
         return tiles, house_tiles, house_locations
-
 
     def render_tiles(self, camera):
         for x in range(int(camera.tl.x) - 4, int(camera.br.x) + WIDTH + 4):

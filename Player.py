@@ -68,18 +68,6 @@ class Player(pygame.sprite.Sprite):
         direction = self.get_direction(keys)
         self.real_pos += direction * CAMERA_SPEED
         self.pos += direction * self.speed * zoom
-
-        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH)
-        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT)
-        
-        if (self.real_pos.x > CAMERA_PADDING_X / (TILE_SIZE * zoom) and
-            self.real_pos.x < WORLD_WIDTH - CAMERA_PADDING_X / (TILE_SIZE * zoom)):
-            self.pos.x = clamp(self.pos.x, CAMERA_PADDING_X, SCREEN_WIDTH - CAMERA_PADDING_X)
-        if (self.real_pos.y > CAMERA_PADDING_Y / (TILE_SIZE * zoom) and 
-            self.real_pos.y < WORLD_HEIGHT - CAMERA_PADDING_Y / (TILE_SIZE * zoom)):
-            self.pos.y = clamp(self.pos.y, CAMERA_PADDING_Y, SCREEN_HEIGHT - CAMERA_PADDING_Y)
-        self.pos.x = clamp(self.pos.x, 0, SCREEN_WIDTH)
-        self.pos.y = clamp(self.pos.y, 0, SCREEN_HEIGHT)
         
         orit = get_orient_discrete(direction)
         if orit is not None:
