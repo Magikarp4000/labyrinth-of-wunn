@@ -23,6 +23,7 @@ def detect_action(reply):
             action.t = ACTION_SUICIDE
 
         action.location = obj['action']['location']
+        action.friend = obj['action']['friendliness']
         return action
     except:
         return Action()

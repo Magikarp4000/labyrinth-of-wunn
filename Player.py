@@ -17,7 +17,8 @@ class Player(pygame.sprite.Sprite):
 
         self.zoom = 1
 
-        self.strength = 1
+        self.health = PLAYER_HEALTH
+        self.dmg = PLAYER_DMG
 
         self.real_pos = Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -52,13 +53,13 @@ class Player(pygame.sprite.Sprite):
 
     def get_direction(self, keys):
         direction = Vector2(0, 0)
-        if keys[K_s]:
+        if keys[K_s] or keys[K_DOWN]:
             direction.y += self.speed
-        if keys[K_w]:
+        if keys[K_w] or keys[K_UP]:
             direction.y -= self.speed
-        if keys[K_d]:
+        if keys[K_d] or keys[K_RIGHT]:
             direction.x += self.speed
-        if keys[K_a]:
+        if keys[K_a] or keys[K_LEFT]:
             direction.x -= self.speed
         if direction.length() > 0:
             direction = direction.normalize()
@@ -89,8 +90,6 @@ class Player(pygame.sprite.Sprite):
         if self.orit == 3:
             img = self.down[ii].get_image(self.tick)
         self.image = img
-        # self.image = scale_image(img, PLAYER_SIZE)
-        # self.rect = self.image.get_rect(center=self.pos)
 
         self.tick += 1
         self.moving = False

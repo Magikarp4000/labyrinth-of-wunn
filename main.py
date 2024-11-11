@@ -131,6 +131,8 @@ class Game:
                 collide.speed = NPC_SPEED / TILE_SIZE
             elif action.t == ACTION_SUICIDE:
                 collide.die()
+            collide.friend = action.friend
+            print(f"friendliness: {collide.friend}")
             self.wait = True
 
     def main(self):
@@ -174,7 +176,7 @@ class Game:
                         player.attack()
                         kills = self.get_collision(player, self.npcs)
                         if kills is not None:
-                            kills.die()
+                            kills.health -= player.dmg
             keys = pygame.key.get_pressed()
             # In dialogue
             if self.in_dialogue and not self.in_typing:
@@ -195,7 +197,7 @@ class Game:
                 camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 camera.render(player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
             pygame.display.flip()
-            print(clock.get_fps())
+            # print(clock.get_fps())
             clock.tick(FPS)
 
         pygame.quit()
