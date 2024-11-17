@@ -35,7 +35,6 @@ class Game:
         self.zoom = 1
 
         self.tile_size = TILE_SIZE
-        self.tiles = self.gen_world()
 
         self.in_dialogue = False
         self.in_typing = False
@@ -77,16 +76,18 @@ class Game:
                 y = random.randint(HOUSE_PADDING_Y, WORLD_HEIGHT - HOUSE_PADDING_Y - 1)
                 if not self.check_house(x, y, house_tiles):
                     house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH, HOUSE_HEIGHT))
-                    house_tiles[x,y] = house_image
+                    house_tiles[y, x] = house_image
                     break
         
         # Special houses
+        print(house_tiles.keys())
         special_houses = random.sample(list(house_tiles.keys()), len(LOCATIONS))
         for idx, house in enumerate(special_houses):
             house_locations[LOCATIONS[idx]] = house
-            text_image = singletext(f"{LOCATIONS[idx]}: {house[0]}, {house[1]}", house[0],
-                                    house[1])[0]
-            house_texts.append(HouseText(house[0], house[1], text_image))
+            print(LOCATIONS[idx], house[1], house[0])
+            text_image = singletext(f"{LOCATIONS[idx]}: {house[1]}, {house[0]}", house[1],
+                                    house[0])[0]
+            house_texts.append(HouseText(house[1], house[0], text_image))
         
         return tiles, house_tiles, house_locations, house_texts
 
