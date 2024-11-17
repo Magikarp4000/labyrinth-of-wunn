@@ -1,10 +1,8 @@
 import pygame
 from pygame.locals import *
 from pygame.math import Vector2
-from pygame.math import clamp
 
 import random
-import math
 
 from config import *
 from Camera import Camera
@@ -197,13 +195,11 @@ class Game:
                 camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 camera.render(player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
             pygame.display.flip()
-            # print(clock.get_fps())
             clock.tick(FPS)
 
         pygame.quit()
 
 
 if __name__ == '__main__':
-    # print(math.atan(-math.sqrt(3)/1))
     game = Game()
     game.main()

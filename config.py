@@ -1,4 +1,5 @@
 """Config file."""
+
 import math
 
 
