@@ -1,7 +1,6 @@
 from config import *
 from utils import *
 
-from character import Character
 from collections import deque
 from dialogue import Dialogue
 

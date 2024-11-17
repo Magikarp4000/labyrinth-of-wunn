@@ -11,8 +11,11 @@ from Spritesheet import Spritesheet
 from utils import *
 from dialogue import Dialogue
 from npc import NPC
-from action import detect_dialogue, detect_action
 from action import *
+from texts import HouseText
+
+
+INVALID_TILES = [(12, 14), (15, 14)]
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -40,7 +43,7 @@ class Game:
         self.wait = False
 
         self.nps = []
-        self.tiles, self.house_tiles, self.locations = self.gen_world()
+        self.tiles, self.house_tiles, self.locations, self.house_texts = self.gen_world()
     
     def check_house(self, x, y, house_tiles):
         for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
@@ -55,25 +58,37 @@ class Game:
         house_tiles = {}
         tiles = {}
         house_locations = {}
+        house_texts = []
+
+        # Tiles
         for i in range(WORLD_HEIGHT + 1):
             for j in range(WORLD_WIDTH + 1):
-                x, y = 12, 14
-                while (x, y) == (12, 14) or (x, y) == (15, 14):
+                x, y = INVALID_TILES[0]
+                while (x, y) in INVALID_TILES:
                     x = random.randint(0, tilesheet.w - 1)
                     y = random.randint(0, tilesheet.h - 1)
                 tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
                 tiles[i, j] = tile
+        
+        # Houses
         for _ in range(NUM_HOUSES):
             for _ in range(MAX_HOUSE_CHECK):
-                x,y = random.randint(15,WORLD_WIDTH-16), random.randint(10,WORLD_HEIGHT-11)
+                x = random.randint(HOUSE_PADDING_X, WORLD_WIDTH - HOUSE_PADDING_X - 1)
+                y = random.randint(HOUSE_PADDING_Y, WORLD_HEIGHT - HOUSE_PADDING_Y - 1)
                 if not self.check_house(x, y, house_tiles):
-                    house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH,HOUSE_HEIGHT))
+                    house_image = pygame.transform.scale(house_image, (HOUSE_WIDTH, HOUSE_HEIGHT))
                     house_tiles[x,y] = house_image
                     break
+        
+        # Special houses
         special_houses = random.sample(list(house_tiles.keys()), len(LOCATIONS))
         for idx, house in enumerate(special_houses):
             house_locations[LOCATIONS[idx]] = house
-        return tiles, house_tiles, house_locations
+            text_image = singletext(f"{LOCATIONS[idx]}: {house[0]}, {house[1]}", house[0],
+                                    house[1])[0]
+            house_texts.append(HouseText(house[0], house[1], text_image))
+        
+        return tiles, house_tiles, house_locations, house_texts
 
     def render_tiles(self, camera):
         for x in range(int(camera.tl.x) - 4, int(camera.br.x) + WIDTH + 4):
@@ -143,7 +158,8 @@ class Game:
                                          for _ in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
-        camera = Camera(player, screen)
+        camera = Camera(player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
+                        CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
 
         running = True
         while running:
@@ -190,10 +206,14 @@ class Game:
                 # Update camera
                 camera.update()
                 # Rendering
-                camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE))
+                camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
                 camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
+                for text in self.house_texts:
+                    camera.render(text, text.size, padding=5)
                 camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 camera.render(player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                bruh = singletext(f"{round(player.real_pos[0], 2)}, {round(player.real_pos[1], 2)}", 20, 20)
+                screen.blit(*bruh)
             pygame.display.flip()
             clock.tick(FPS)
 
