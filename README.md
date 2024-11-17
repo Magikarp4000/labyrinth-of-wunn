@@ -1,17 +1,10 @@
-# Cam Hack 24
+# CamHack24: Labyrinth of Wunn
 
-## To setup
-```sh
-python -m venv venv
-. ./venv/bin/activate
-pip install -r requirements.txt
-```
-
-## Setup API key
+## Setup
 1. Install requirements: ```pip install -r requirements.txt```
 2. Create an account and setup API key here: https://console.groq.com/keys
 3. Create a file named `secrets.yaml`
-4. Write in the file:
+4. In `secrets.yaml`, write:
    ```
    groq:
      api_key: {YOUR_API_KEY}
