@@ -20,7 +20,7 @@ def detect_action(reply):
         elif obj['action']['type'] == 'scream':
             action.t = ACTION_SCREAM
         elif obj['action']['type'] == 'suicide':
-            action.t = ACTION_SUICIDE
+            action.t = ACTION_DIE
 
         action.location = obj['action']['location']
         action.friend = obj['action']['friendliness']

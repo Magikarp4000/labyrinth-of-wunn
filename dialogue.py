@@ -37,7 +37,7 @@ class Dialogue:
                     "role": "system",
                     'content': "Your personality can be described as follows: " + player_background +
                     '''You are living in a big city with a murderer on the run.
-                    In your city, you have the following available locations: 'shop', 'cafe', 'police office', 'office', 'alleyways' and 'cinema'.
+                    In your city, you have the following available locations: 'shop', 'cafe', 'office', 'alleyways' and 'cinema'.
                     You need to answer in JSON format. Make sure every reply is one sentence or so, as if in a realistic conversation. The average 
                     friendliness value is 50.
                     The JSON schema should include

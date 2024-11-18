@@ -121,12 +121,16 @@ class Game:
             if action.location in self.locations:
                 collide.good_target = True
                 collide.target = self.locations[action.location]
-            if action.t == ACTION_RUN or action.t == ACTION_SCREAM:
+            if action.t == ACTION_RUN:
                 collide.set_run()
+            elif action.t == ACTION_SCREAM:
+                collide.set_run()
+                self.spread(collide)
             elif action.t == ACTION_WALK:
                 collide.reset_run()
-            elif action.t == ACTION_SUICIDE:
-                collide.die()
+            elif action.t == ACTION_DIE:
+                collide.health = 0
+                self.spread(collide)
             collide.friend = action.friend
             self.wait = True
 
@@ -149,7 +153,8 @@ class Game:
         self.player = Player()
         sprites.add(self.player)
 
-        self.npcs = pygame.sprite.Group([NPC(*(self.player.real_pos + (self.get_random(10), self.get_random(10))))
+        self.npcs = pygame.sprite.Group([NPC(*(self.player.real_pos + 
+                                               (self.get_random(SPAWN_RADIUS), self.get_random(SPAWN_RADIUS))))
                                          for _ in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
