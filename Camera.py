@@ -73,9 +73,12 @@ class Camera:
         self.tl = self.real_pos - self.pos / self.base_ratio
         self.br = self.real_pos + ((self.scr_width, self.scr_height) - self.pos) / self.ratio
     
+    def in_frame(self, object, padding=0):
+        return (self.tl.x - padding <= object.real_pos.x and self.br.x + padding >= object.real_pos.x and
+                self.tl.y - padding <= object.real_pos.y and self.br.y + padding >= object.real_pos.y)
+
     def render(self, object, obj_size, padding=1):
-        if (self.tl.x - padding <= object.real_pos.x and self.br.x + padding >= object.real_pos.x and
-            self.tl.y - padding <= object.real_pos.y and self.br.y + padding >= object.real_pos.y):
+        if self.in_frame(object, padding):
             pos_x = self.pos.x - (self.real_pos.x - object.real_pos.x) * self.ratio
             pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio
 

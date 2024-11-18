@@ -158,6 +158,8 @@ class Game:
 
     def npc_interaction(self):
         for npc in self.npcs:
+            if not self.camera.in_frame(npc):
+                continue
             collide = self.get_collision_within_group(npc, self.npcs)
             if collide is not None:              
                 if random.random() < NPC_DIALOGUE_CHANCE:
@@ -183,7 +185,7 @@ class Game:
                                         for i in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
-        camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
+        self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
 
         running = True
@@ -209,7 +211,7 @@ class Game:
                             self.wait = False
                 # End of dialogue toggler
                 if event.type == MOUSEWHEEL:
-                    camera.update_zoom(event.y)
+                    self.camera.update_zoom(event.y)
                 if event.type == KEYDOWN:
                     if event.key == K_x:
                         self.attack_event()
@@ -224,18 +226,18 @@ class Game:
                 # NPC interaction
                 self.npc_interaction()
                 # Player movement
-                self.player.move(keys, camera.zoom)
+                self.player.move(keys, self.camera.zoom)
                 # Update sprites
                 sprites.update(self.player.real_pos)
-                # Update camera
-                camera.update()
+                # Update self.camera
+                self.camera.update()
                 # Rendering
-                camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
-                camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
+                self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
+                self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
                 for text in self.house_texts:
-                    camera.render(text, text.size, padding=5)
-                camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-                camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                    self.camera.render(text, text.size, padding=5)
+                self.camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
                                       INFO_PADDING_X, INFO_PADDING_Y)
                 screen.blit(*pos_text)
