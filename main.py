@@ -94,8 +94,8 @@ class Game:
         for image, rect in zip(text_images, text_rects):
             screen.blit(image, rect)        
     
-    def get_collision(self, player, sprites):
-        collide = pygame.sprite.spritecollideany(player, sprites)
+    def get_collision(self, base, sprites):
+        collide = pygame.sprite.spritecollideany(base, sprites)
         return collide
 
     def get_random(self, size):
@@ -132,17 +132,25 @@ class Game:
             collide.friend = action.friend
             self.wait = True
 
+    def attack_event(self):
+        self.player.attack()
+        collide = self.get_collision(self.player, self.npcs)
+        if collide is not None:
+            collide.health -= self.player.dmg
+            collide.run = True
+            collide.speed = NPC_RUN_SPEED / TILE_SIZE
+
     def main(self):
         sprites = pygame.sprite.Group()
 
-        player = Player()
-        sprites.add(player)
+        self.player = Player()
+        sprites.add(self.player)
 
-        self.npcs = pygame.sprite.Group([NPC(*(player.real_pos + (self.get_random(10), self.get_random(10))))
+        self.npcs = pygame.sprite.Group([NPC(*(self.player.real_pos + (self.get_random(10), self.get_random(10))))
                                          for _ in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
-        camera = Camera(player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
+        camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
 
         running = True
@@ -162,7 +170,7 @@ class Game:
                             self.typed_text += event.unicode
                         continue
                     if event.key == pygame.K_SPACE:
-                        collide = self.get_collision(player, self.npcs)
+                        collide = self.get_collision(self.player, self.npcs)
                         if collide is not None:
                             self.in_dialogue = not self.in_dialogue
                             self.wait = False
@@ -171,12 +179,7 @@ class Game:
                     camera.update_zoom(event.y)
                 if event.type == KEYDOWN:
                     if event.key == K_x:
-                        player.attack()
-                        kills = self.get_collision(player, self.npcs)
-                        if kills is not None:
-                            kills.health -= player.dmg
-                            kills.run = True
-                            kills.speed = NPC_RUN_SPEED / TILE_SIZE
+                        self.attack_event()
             keys = pygame.key.get_pressed()
             # In dialogue
             if self.in_dialogue and not self.in_typing:
@@ -186,9 +189,9 @@ class Game:
                 self.display_text(self.typed_text)
             else:
                 # Player movement
-                player.move(keys, camera.zoom)
+                self.player.move(keys, camera.zoom)
                 # Update sprites
-                sprites.update(player.real_pos)
+                sprites.update(self.player.real_pos)
                 # Update camera
                 camera.update()
                 # Rendering
@@ -197,8 +200,8 @@ class Game:
                 for text in self.house_texts:
                     camera.render(text, text.size, padding=5)
                 camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-                camera.render(player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-                pos_text = singletext(f"Coords: ({round(player.real_pos[0], 1)}, {round(player.real_pos[1], 1)})",
+                camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
                                       INFO_PADDING_X, INFO_PADDING_Y)
                 screen.blit(*pos_text)
             pygame.display.flip()
