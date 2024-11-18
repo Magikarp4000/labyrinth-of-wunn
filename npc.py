@@ -56,6 +56,14 @@ class NPC(pygame.sprite.Sprite):
 
     def random_target(self):
         return Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
+    
+    def set_run(self):
+        self.run = True
+        self.speed = NPC_RUN_SPEED / TILE_SIZE
+    
+    def reset_run(self):
+        self.run = False
+        self.speed = NPC_SPEED / TILE_SIZE
 
     def update(self, player_pos):
         self.health = max(0, self.health)

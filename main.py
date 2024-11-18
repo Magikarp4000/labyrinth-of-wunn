@@ -122,23 +122,26 @@ class Game:
                 collide.good_target = True
                 collide.target = self.locations[action.location]
             if action.t == ACTION_RUN or action.t == ACTION_SCREAM:
-                collide.run = True
-                collide.speed = NPC_RUN_SPEED / TILE_SIZE
+                collide.set_run()
             elif action.t == ACTION_WALK:
-                collide.run = False
-                collide.speed = NPC_SPEED / TILE_SIZE
+                collide.reset_run()
             elif action.t == ACTION_SUICIDE:
                 collide.die()
             collide.friend = action.friend
             self.wait = True
+
+    def spread(self, source):
+        for npc in self.npcs:
+            if source.real_pos.distance_to(npc.real_pos) <= MAX_SPREAD_DIST:
+                npc.set_run()
 
     def attack_event(self):
         self.player.attack()
         collide = self.get_collision(self.player, self.npcs)
         if collide is not None:
             collide.health -= self.player.dmg
-            collide.run = True
-            collide.speed = NPC_RUN_SPEED / TILE_SIZE
+            collide.set_run()
+            self.spread(collide)
 
     def main(self):
         sprites = pygame.sprite.Group()
