@@ -15,8 +15,10 @@ import random
 NPC_CLEAR_QUEUE = 1
 
 class NPC(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, id, x, y):
         super().__init__()
+        self.id = id
+
         self.sus = 0
         self.actions = deque()
         self.dialogue = None

@@ -32,7 +32,8 @@ class Dialogue:
 
         player_background = get_background.choices[0].message.content
 
-        self.memory = [
+        self.memory = {
+            'base': [
                 {
                     "role": "system",
                     'content': "Your personality can be described as follows: " + player_background +
@@ -50,17 +51,37 @@ class Dialogue:
   "dialogue": "string"
 }'''
                 },
-        ]
+            ]
+        }
 
-    def test(self, prompt = None):
-        if prompt == None:
-            prompt = input()
-        self.memory.append({
+    def save(self, prompt=None, response=None, source=None):
+        if source not in self.memory:
+            self.memory[source] = []
+        if prompt:
+            self.memory[source].append({
                 "role": "user",
                 "content": prompt,
-        })
+            })
+        if response:
+            self.memory[source].append({
+                'role': 'assistant',
+                'content': response
+            })
+
+    def test(self, prompt=None, source='user', save=True):
+        if prompt == None:
+            prompt = input()
+        if source not in self.memory:
+            self.memory[source] = []
+        if save:
+            self.memory[source].append({
+                "role": "user",
+                "content": prompt,
+            })
+        messages = self.memory['base'].copy()
+        messages.extend(self.memory[source])
         chat_completion = self.client.chat.completions.create(
-            messages=self.memory,
+            messages=messages,
             model="llama-3.1-8b-instant",
             temperature=1.0,
             max_tokens=2048,
@@ -70,10 +91,11 @@ class Dialogue:
             response_format={"type": "json_object"}
         )
         x = chat_completion.choices[0].message.content
-        self.memory.append({
-            'role': 'assistant',
-            'content': x
-        })
+        if save:
+            self.memory[source].append({
+                'role': 'assistant',
+                'content': x
+            })
         return x
 
 if __name__ == '__main__':

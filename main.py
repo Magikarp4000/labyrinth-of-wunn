@@ -106,6 +106,7 @@ class Game:
         if not self.wait:
             if collide.dialogue is None:
                 collide.dialogue = Dialogue()
+            if 'user' not in collide.dialogue.memory:
                 response = collide.dialogue.test("Hi! Briefly introduce yourself.")
             else:
                 if self.typed_text is None:
@@ -115,6 +116,7 @@ class Game:
                 else:
                     response = collide.dialogue.test(self.typed_text)
                     self.typed_text = None
+        
         if response is not None:
             self.display_text(detect_dialogue(response))
             action = detect_action(response)
@@ -146,6 +148,28 @@ class Game:
             collide.health -= self.player.dmg
             collide.set_run()
             self.spread(collide)
+    
+    def get_collision_within_group(self, base, sprites):
+        collides = pygame.sprite.spritecollide(base, sprites, dokill=False)
+        for collide in collides:
+            if collide != base:
+                return collide
+        return None
+
+    def npc_interaction(self):
+        for npc in self.npcs:
+            collide = self.get_collision_within_group(npc, self.npcs)
+            if collide is not None:              
+                if random.random() < NPC_DIALOGUE_CHANCE:
+                    if npc.dialogue is None:
+                        npc.dialogue = Dialogue()
+                    if collide.dialogue is None:
+                        collide.dialogue = Dialogue()
+                    prompt = npc.dialogue.test(f"What do you want to say to me?", collide.id, save=False)
+                    response = collide.dialogue.test(prompt, npc.id)
+                    npc.dialogue.save(prompt=response, source=collide.id)
+                    print(npc.id, prompt)
+                    print(collide.id, response)
 
     def main(self):
         sprites = pygame.sprite.Group()
@@ -153,9 +177,10 @@ class Game:
         self.player = Player()
         sprites.add(self.player)
 
-        self.npcs = pygame.sprite.Group([NPC(*(self.player.real_pos + 
-                                               (self.get_random(SPAWN_RADIUS), self.get_random(SPAWN_RADIUS))))
-                                         for _ in range(NUM_NPCS)])
+        self.npcs = pygame.sprite.Group([NPC(i,
+                                             self.player.real_pos.x + self.get_random(SPAWN_RADIUS),
+                                             self.player.real_pos.y + self.get_random(SPAWN_RADIUS))
+                                        for i in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
         camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
@@ -196,6 +221,8 @@ class Game:
             elif self.in_typing:
                 self.display_text(self.typed_text)
             else:
+                # NPC interaction
+                self.npc_interaction()
                 # Player movement
                 self.player.move(keys, camera.zoom)
                 # Update sprites
