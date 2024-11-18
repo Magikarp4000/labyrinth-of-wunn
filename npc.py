@@ -9,6 +9,7 @@ from animation import Animation
 
 import pygame
 from pygame.math import Vector2
+from pygame.math import clamp
 import random
 
 NPC_CLEAR_QUEUE = 1
@@ -81,7 +82,10 @@ class NPC(pygame.sprite.Sprite):
                 self.run = False
                 self.speed = NPC_SPEED / TILE_SIZE
                 self.target = self.random_target()
+        
         self.real_pos += direction.normalize() * self.speed
+        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH)
+        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT)
 
         self.orit = get_orient(direction)
         ii = 0

@@ -11,6 +11,7 @@ class HouseText:
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(0, 0)
 
+        self.orig_image = image
         self.image = image
         self.rect = self.image.get_rect()
 

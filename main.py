@@ -71,7 +71,7 @@ class Game:
         
         # Houses
         for _ in range(NUM_HOUSES):
-            for _ in range(MAX_HOUSE_CHECK):
+            for _ in range(MAX_HOUSE_CHECK): # guarantees execution
                 x = random.randint(HOUSE_PADDING_X, WORLD_WIDTH - HOUSE_PADDING_X - 1)
                 y = random.randint(HOUSE_PADDING_Y, WORLD_HEIGHT - HOUSE_PADDING_Y - 1)
                 if not self.check_house(x, y, house_tiles):
@@ -80,29 +80,13 @@ class Game:
                     break
         
         # Special houses
-        print(house_tiles.keys())
         special_houses = random.sample(list(house_tiles.keys()), len(LOCATIONS))
         for idx, house in enumerate(special_houses):
-            house_locations[LOCATIONS[idx]] = house
-            print(LOCATIONS[idx], house[1], house[0])
-            text_image = singletext(f"{LOCATIONS[idx]}: {house[1]}, {house[0]}", house[1],
-                                    house[0])[0]
+            house_locations[LOCATIONS[idx]] = (house[1], house[0])
+            text_image = singletext(f"{LOCATIONS[idx].title()}", house[1] - 3, house[0] - 4)[0]
             house_texts.append(HouseText(house[1], house[0], text_image))
         
         return tiles, house_tiles, house_locations, house_texts
-
-    def render_tiles(self, camera):
-        for x in range(int(camera.tl.x) - 4, int(camera.br.x) + WIDTH + 4):
-            for y in range(int(camera.tl.y) - 4, int(camera.br.y) + HEIGHT + 4):
-                if (x, y) in self.house_tiles:
-                    self.house_tiles[x, y] = pygame.transform.scale(self.house_tiles[x,y], (HOUSE_WIDTH*self.zoom,HOUSE_HEIGHT*self.zoom))
-                    pos_x = camera.pos.x - (camera.real_pos.x - x) * self.tile_size
-                    pos_y = camera.pos.y - (camera.real_pos.y - y) * self.tile_size
-                    screen.blit(self.house_tiles[x, y], self.house_tiles[x, y].get_rect(center=(pos_x, pos_y)))
-                for location in self.locations:
-                    if self.locations[location] == (x, y):
-                        images, rects = multitext(location.title(), pos_x - self.tile_size / 2, pos_y - self.tile_size * 3, SCREEN_WIDTH, DIALOGUE_YSPACING, 'Arial', FONT_SIZE, BLACK)
-                        screen.blit(images[0], rects[0])
 
     def display_text(self, text):
         text_images, text_rects = multitext(text, DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), DIALOGUE_YSPACING, 'Arial', FONT_SIZE, BLACK)
@@ -146,7 +130,6 @@ class Game:
             elif action.t == ACTION_SUICIDE:
                 collide.die()
             collide.friend = action.friend
-            print(f"friendliness: {collide.friend}")
             self.wait = True
 
     def main(self):
@@ -192,6 +175,8 @@ class Game:
                         kills = self.get_collision(player, self.npcs)
                         if kills is not None:
                             kills.health -= player.dmg
+                            kills.run = True
+                            kills.speed = NPC_RUN_SPEED / TILE_SIZE
             keys = pygame.key.get_pressed()
             # In dialogue
             if self.in_dialogue and not self.in_typing:
@@ -213,8 +198,9 @@ class Game:
                     camera.render(text, text.size, padding=5)
                 camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 camera.render(player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-                bruh = singletext(f"{round(player.real_pos[0], 2)}, {round(player.real_pos[1], 2)}", 20, 20)
-                screen.blit(*bruh)
+                pos_text = singletext(f"Coords: ({round(player.real_pos[0], 1)}, {round(player.real_pos[1], 1)})",
+                                      INFO_PADDING_X, INFO_PADDING_Y)
+                screen.blit(*pos_text)
             pygame.display.flip()
             clock.tick(FPS)
 

@@ -80,7 +80,11 @@ class Camera:
             pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio
 
             object.pos = Vector2(pos_x, pos_y)
-            object.image = pygame.transform.scale(object.image, self.zoom * obj_size)
+            try:
+                base_image = object.orig_image
+            except:
+                base_image = object.image
+            object.image = pygame.transform.scale(base_image, self.zoom * obj_size)
             object.rect = object.image.get_rect(center=object.pos)
 
             self.screen.blit(object.image, object.rect)
