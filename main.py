@@ -3,6 +3,7 @@ from pygame.locals import *
 from pygame.math import Vector2
 
 import random
+import time
 
 from config import *
 from Camera import Camera
@@ -172,6 +173,8 @@ class Game:
                     npc.dialogue.save(prompt=response, source=collide.id)
                     print(npc.id, prompt)
                     print(collide.id, response)
+                    return multitext(prompt, npc.pos.x, npc.pos.y - 20, 300, 10, font_size=10, pos='center')
+        return None
 
     def main(self):
         sprites = pygame.sprite.Group()
@@ -187,6 +190,7 @@ class Game:
 
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
+        npc_buffer = []
 
         running = True
         while running:
@@ -224,7 +228,17 @@ class Game:
                 self.display_text(self.typed_text)
             else:
                 # NPC interaction
-                self.npc_interaction()
+                npc_inter = self.npc_interaction()
+
+                now = time.time()
+                if npc_inter is not None:
+                    for obj in zip(*npc_inter):
+                        npc_buffer.append((obj, now))
+                
+                for obj, start_time in npc_buffer:
+                    if now - start_time > NPC_DIALOGUE_TIME:
+                        npc_buffer.remove((obj, start_time))
+
                 # Player movement
                 self.player.move(keys, self.camera.zoom)
                 # Update sprites
@@ -240,6 +254,9 @@ class Game:
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
                                       INFO_PADDING_X, INFO_PADDING_Y)
+                # print(npc_inter)
+                for obj in npc_buffer:
+                    screen.blit(*obj[0])
                 screen.blit(*pos_text)
             pygame.display.flip()
             clock.tick(FPS)

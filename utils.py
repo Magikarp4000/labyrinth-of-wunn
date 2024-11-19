@@ -21,6 +21,8 @@ def singletext(text, x, y, font_name='Arial', font_size=FONT_SIZE, colour=BLACK,
         rect = image.get_rect(bottomleft = (x, y))
     elif pos == 'bottomright':
         rect = image.get_rect(bottomright = (x, y))
+    elif pos == 'center':
+        rect = image.get_rect(center = (x, y))
     return image, rect
 
 def multitext(text, x, y, w, spacing, font_name='Arial', font_size=FONT_SIZE, colour=BLACK, pos='topleft', antialias=False):
@@ -40,7 +42,6 @@ def multitext(text, x, y, w, spacing, font_name='Arial', font_size=FONT_SIZE, co
         images.append(image)
         rects.append(rect)
         y += spacing
-    
     return images, rects
 
 def get_quandrant(direction):
