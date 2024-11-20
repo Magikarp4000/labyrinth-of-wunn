@@ -95,9 +95,9 @@ class Game:
         screen.blit(*text)
 
     def display_dialogue_text(self, text):
-        text_images, text_rects = multitext(text, DLG_X + DLG_BOX_PAD_LEFT, DLG_Y + DLG_BOX_PAD_Y,
-                                            DLG_WIDTH - DLG_BOX_PAD_RIGHT, DLG_SPACING,
-                                            'Arial', FONT_SIZE, BLACK)
+        text_images, text_rects = multitext(text, x=DLG_X + DLG_BOX_PAD_LEFT, y=DLG_Y + DLG_BOX_PAD_Y,
+                                            w=DLG_WIDTH - DLG_BOX_PAD_RIGHT, spacing=DLG_SPACING,
+                                            font_name='Arial', font_size=FONT_SIZE, colour=BLACK)
         pygame.draw.rect(screen, WHITE, (DLG_X, DLG_Y, DLG_WIDTH, DLG_HEIGHT))
         for image, rect in zip(text_images, text_rects):
             screen.blit(image, rect)
@@ -216,7 +216,7 @@ class Game:
                                         for identifier in range(NUM_NPCS)])
         sprites.add(self.npcs)
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
-                        CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
+                        CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM, zoom=START_ZOOM)
 
         running = True
         while running:

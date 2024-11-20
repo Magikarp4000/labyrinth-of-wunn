@@ -7,7 +7,8 @@ from utils import *
 
 
 class Camera:
-    def __init__(self, obj, screen: pygame.Surface, base_ratio, world_width, world_height, cam_pad_x, cam_pad_y, zoom_rate, max_zoom):
+    def __init__(self, obj, screen: pygame.Surface, base_ratio, world_width, world_height, 
+                 cam_pad_x, cam_pad_y, zoom_rate, max_zoom, zoom=1):
         self.obj = obj
         self.screen = screen
         self.base_ratio = base_ratio
@@ -20,13 +21,13 @@ class Camera:
         self.zoom_rate = zoom_rate
         self.max_zoom = max_zoom
 
-        self.real_pos = obj.real_pos / self.base_ratio
+        self.zoom = zoom
+        self.ratio = self.base_ratio * zoom
+
+        self.real_pos = obj.real_pos / self.ratio
         self.pos = obj.pos
-        self.tl = self.real_pos - self.pos / self.base_ratio
-        self.br = self.real_pos + ((self.scr_width, self.scr_height) - self.pos) / self.base_ratio
-        
-        self.zoom = 1
-        self.ratio = self.base_ratio
+        self.tl = self.real_pos - self.pos / self.ratio
+        self.br = self.real_pos + ((self.scr_width, self.scr_height) - self.pos) / self.ratio
     
     def update_zoom(self, delta_zoom):
         self.zoom = clamp(self.zoom + delta_zoom * self.zoom_rate, 1, self.max_zoom)
@@ -67,7 +68,7 @@ class Camera:
         self.real_pos = self.obj.real_pos
         self.pos = self.obj.pos
 
-        self.tl = self.real_pos - self.pos / self.base_ratio
+        self.tl = self.real_pos - self.pos / self.ratio
         self.br = self.real_pos + ((self.scr_width, self.scr_height) - self.pos) / self.ratio
     
     def in_frame(self, object, padding=0):
