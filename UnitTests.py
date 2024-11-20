@@ -27,6 +27,7 @@ class UnitTests:
         self.camera = Camera(self.player, self.screen, self.tile_size, WORLD_WIDTH, WORLD_HEIGHT,
                              CAMERA_PADDING_X, CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
         
+        self.init_tests = []
         self.render_tests = []
     
     def gen_tiles(self):
@@ -42,7 +43,19 @@ class UnitTests:
                 tiles[i, j] = tile
         return tiles
     
+    def add_test(self, test, test_type='init', *args, **kwargs):
+        if test_type == 'init':
+            self.init_tests.append((test, args, kwargs))
+        elif test_type == 'render':
+            self.render_tests.append((test, args, kwargs))
+
+    def run_tests(self, tests):
+        for test, args, kwargs in tests:
+            test(*args, *kwargs)
+
     def main(self):
+        self.run_tests(self.init_tests)
+
         running = True
         while running:
             # Event handling
@@ -60,19 +73,16 @@ class UnitTests:
             self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
             self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
-            # Execute render tests
-            for test, args, kwargs in self.render_tests:
-                test(*args, *kwargs)
+            self.run_tests(self.render_tests)
 
             pygame.display.flip()
             self.clock.tick(FPS)
         pygame.quit()
     
-    def add_test(self, test, test_type='render', *args, **kwargs):
-        if test_type == 'render':
-            self.render_tests.append((test, args, kwargs))
-    
     # Unit tests
+    def midbottom_text_init_test(self):
+        multitext("hello"*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+
     def midbottom_text_test(self):
         texts = multitext("hello"*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
         for image, rect in zip(*texts):
@@ -82,6 +92,7 @@ class UnitTests:
 if __name__ == '__main__':
     env = UnitTests(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-    env.add_test(env.midbottom_text_test)
+    env.add_test(env.midbottom_text_init_test, 'init')
+    # env.add_test(env.midbottom_text_test, 'render')
 
     env.main()
