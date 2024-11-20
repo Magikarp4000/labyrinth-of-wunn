@@ -9,3 +9,7 @@
    groq:
      api_key: {YOUR_API_KEY}
    ```
+
+## Run
+1. Change to root directory (labyrinth-of-wunn)
+2. Run main.py
