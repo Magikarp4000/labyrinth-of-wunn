@@ -13,8 +13,10 @@ from Player import Player
 from Camera import Camera
 
 
-class TestEnvironment:
+class UnitTests:
     def __init__(self, screen_width, screen_height):
+        self.scr_width = screen_width
+        self.scr_height = screen_height
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         self.clock = pygame.time.Clock()
 
@@ -24,6 +26,8 @@ class TestEnvironment:
         self.player = Player()
         self.camera = Camera(self.player, self.screen, self.tile_size, WORLD_WIDTH, WORLD_HEIGHT,
                              CAMERA_PADDING_X, CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
+        
+        self.render_tests = []
     
     def gen_tiles(self):
         tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', TILESHEET_TILE_SIZE)
@@ -55,11 +59,29 @@ class TestEnvironment:
             # Render
             self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
             self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+
+            # Execute render tests
+            for test, args, kwargs in self.render_tests:
+                test(*args, *kwargs)
+
             pygame.display.flip()
             self.clock.tick(FPS)
         pygame.quit()
+    
+    def add_test(self, test, test_type='render', *args, **kwargs):
+        if test_type == 'render':
+            self.render_tests.append((test, args, kwargs))
+    
+    # Unit tests
+    def midbottom_text_test(self):
+        texts = multitext("hello"*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+        for image, rect in zip(*texts):
+            self.screen.blit(image, rect)
 
 
 if __name__ == '__main__':
-    env = TestEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT)
+    env = UnitTests(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+    env.add_test(env.midbottom_text_test)
+
     env.main()
