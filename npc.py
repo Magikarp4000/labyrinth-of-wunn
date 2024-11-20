@@ -24,6 +24,7 @@ class NPC(pygame.sprite.Sprite):
         self.health = NPC_HEALTH
         self.dmg = NPC_DMG
         self.speed = NPC_SPEED / TILE_SIZE
+        self.prev_speed = self.speed
 
         self.dialogue = None
 
@@ -54,6 +55,13 @@ class NPC(pygame.sprite.Sprite):
     def random_target(self):
         return Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
     
+    def stop(self):
+        self.prev_speed = self.speed
+        self.speed = 0
+    
+    def start(self):
+        self.speed = self.prev_speed
+
     def set_run(self):
         self.run = True
         self.speed = NPC_RUN_SPEED / TILE_SIZE

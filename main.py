@@ -44,8 +44,24 @@ class Game:
         self.typed_text = None
         self.wait = False
 
-        self.npc_texts = pygame.sprite.Group()
         self.tiles, self.house_tiles, self.locations, self.house_texts = self.gen_world()
+
+        self.sprites = pygame.sprite.Group()
+
+        self.player = Player()
+        self.sprites.add(self.player)
+
+        self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
+                             CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM, zoom=START_ZOOM)
+        
+        self.npcs = pygame.sprite.Group([NPC(identifier,
+                                             self.player.real_pos.x + self.get_random(NPC_SPAWN_RADIUS),
+                                             self.player.real_pos.y + self.get_random(NPC_SPAWN_RADIUS))
+                                        for identifier in range(NUM_NPCS)])
+        self.sprites.add(self.npcs)
+
+        self.npc_texts = pygame.sprite.Group()
+        self.sprites.add(self.npc_texts)
     
     def check_house(self, x, y, house_tiles):
         for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
@@ -183,11 +199,17 @@ class Game:
             dest.dialogue = Dialogue()
         
         try:
+            src.stop()
+            dest.stop()
+
             prompt = src.dialogue.test(f"What do you want to say to me?", dest.id, save=False)
             prompt_dlg = detect_dialogue(prompt)
             response = dest.dialogue.test(prompt_dlg, src.id)
             response_dlg = detect_dialogue(response)
             src.dialogue.save(prompt=response_dlg, source=dest.id)
+
+            src.start()
+            dest.start()
         except:
             print(f"Warning: Attempted NPC interaction between {src.id} and {dest.id} but could not generate response.")
             return None
@@ -212,6 +234,7 @@ class Game:
         return None
     
     def npc_thread(self):
+        thread_clock = pygame.time.Clock()
         while self.running:
             npc_inter = self.npc_interaction()
             if npc_inter is not None:
@@ -219,31 +242,17 @@ class Game:
                 for text in npc_inter:
                     self.npc_texts.add(text)
                     self.sprites.add(text)
-            clock.tick(FPS)
+            thread_clock.tick(FPS)
 
     def main(self):
-        self.sprites = pygame.sprite.Group()
-        self.player = Player()
-        self.sprites.add(self.player)
-        self.npcs = pygame.sprite.Group([NPC(identifier,
-                                             self.player.real_pos.x + self.get_random(NPC_SPAWN_RADIUS),
-                                             self.player.real_pos.y + self.get_random(NPC_SPAWN_RADIUS))
-                                        for identifier in range(NUM_NPCS)])
-        self.sprites.add(self.npcs)
-        self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
-                        CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM, zoom=START_ZOOM)
-
         self.running = True
-        # while self.running:
-        # t1 = threading.Thread(target=self.game_thread)
-        print("npc thread starting")
+
         t2 = threading.Thread(target=self.npc_thread, daemon=True)
         t2.start()
 
         while self.running:
             # Event handling
             for event in pygame.event.get():
-                print(event)
                 if event.type == QUIT:
                     self.running = False
                 # Dialogue toggler    
