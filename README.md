@@ -12,4 +12,4 @@
 
 ## Run
 1. Change to root directory (labyrinth-of-wunn)
-2. Run main.py
+2. Run `main.py`
