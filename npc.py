@@ -66,6 +66,22 @@ class NPC(pygame.sprite.Sprite):
     def reset_run(self):
         self.run = False
         self.speed = NPC_SPEED / TILE_SIZE
+    
+    def act(self, action):
+        if action.location in self.locations:
+            self.good_target = True
+            self.target = self.locations[action.location]
+        if action.t == ACTION_RUN:
+            self.set_run()
+        elif action.t == ACTION_SCREAM:
+            self.set_run()
+            self.spread(self)
+        elif action.t == ACTION_WALK:
+            self.reset_run()
+        elif action.t == ACTION_DIE:
+            self.health = 0
+            self.spread(self)
+        self.friend = action.friend
 
     def update_pos(self, pos):
         self.pos = pos

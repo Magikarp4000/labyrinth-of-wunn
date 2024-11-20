@@ -8,6 +8,7 @@ from pygame.math import Vector2
 from pygame.math import clamp
 from Spritesheet import Spritesheet
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()

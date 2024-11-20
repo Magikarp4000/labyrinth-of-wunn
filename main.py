@@ -16,6 +16,7 @@ from action import *
 from texts import *
 
 
+TILESHEET_TILE_SIZE = 16
 INVALID_TILES = [(12, 14), (15, 14)]
 
 pygame.init()
@@ -53,7 +54,7 @@ class Game:
         return False
 
     def gen_world(self):
-        tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', 16)
+        tilesheet = Spritesheet('assets/texture/TX Tileset Grass.png', TILESHEET_TILE_SIZE)
         house_image = pygame.image.load('assets/Cute_Fantasy_Free/Outdoor decoration/House.png')
         house_tiles = {}
         tiles = {}
@@ -99,63 +100,50 @@ class Game:
         collide = pygame.sprite.spritecollideany(base, sprites)
         return collide
 
-    def get_random(self, size):
-        return random.random() * random.randint(-size, size)
-
-    def interaction(self, collide):
-        response = None
-        if not self.wait:
-            if collide.dialogue is None:
-                collide.dialogue = Dialogue()
-            if 'user' not in collide.dialogue.memory:
-                response = collide.dialogue.test("Hi! Briefly introduce yourself.")
-            else:
-                if self.typed_text is None:
-                    self.in_typing = True
-                    self.typed_text = ""
-                    response = None
-                else:
-                    response = collide.dialogue.test(self.typed_text)
-                    self.typed_text = None
-        
-        if response is not None:
-            self.display_text(detect_dialogue(response))
-            action = detect_action(response)
-            if action.location in self.locations:
-                collide.good_target = True
-                collide.target = self.locations[action.location]
-            if action.t == ACTION_RUN:
-                collide.set_run()
-            elif action.t == ACTION_SCREAM:
-                collide.set_run()
-                self.spread(collide)
-            elif action.t == ACTION_WALK:
-                collide.reset_run()
-            elif action.t == ACTION_DIE:
-                collide.health = 0
-                self.spread(collide)
-            collide.friend = action.friend
-            self.wait = True
-
-    def spread(self, source):
-        for npc in self.npcs:
-            if source.real_pos.distance_to(npc.real_pos) <= MAX_SPREAD_DIST:
-                npc.set_run()
-
-    def attack_event(self):
-        self.player.attack()
-        collide = self.get_collision(self.player, self.npcs)
-        if collide is not None:
-            collide.health -= self.player.dmg
-            collide.set_run()
-            self.spread(collide)
-    
     def get_collision_within_group(self, base, sprites):
         collides = pygame.sprite.spritecollide(base, sprites, dokill=False)
         for collide in collides:
             if collide != base:
                 return collide
         return None
+
+    def get_random(self, size):
+        return random.random() * random.randint(-size, size)
+
+    def player_attack(self):
+        self.player.attack()
+        collide = self.get_collision(self.player, self.npcs)
+        if collide is not None:
+            collide.health -= self.player.dmg
+            collide.set_run()
+            self.spread(collide)
+
+    def get_npc_response(self, npc):
+        if npc.dialogue is None:
+            npc.dialogue = Dialogue()
+        if 'user' not in npc.dialogue.memory:
+            response = npc.dialogue.test("Hi! Briefly introduce yourself.")
+        else:
+            if self.typed_text is None:
+                self.in_typing = True
+                self.typed_text = ""
+                response = None
+            else:
+                response = npc.dialogue.test(self.typed_text)
+                self.typed_text = None
+        return response
+    
+    def process_npc_response(self, npc, response):
+        self.display_text(detect_dialogue(response))
+        npc.act(detect_action(response))
+        self.wait = True
+
+    def interaction(self, collide):
+        response = None
+        if not self.wait:
+            response = self.get_npc_response(collide)
+        if response is not None:
+            self.process_npc_response(collide, response)
 
     def get_npc_text_surfaces(self, text):
         return multitext(text, 0, 0, 300, spacing=20, font_size=15, pos='midbottom')
@@ -169,11 +157,15 @@ class Game:
         if dest.dialogue is None:
             dest.dialogue = Dialogue()
         
-        prompt = src.dialogue.test(f"What do you want to say to me?", dest.id, save=False)
-        prompt_dlg = detect_dialogue(prompt)
-        response = dest.dialogue.test(prompt_dlg, src.id)
-        response_dlg = detect_dialogue(response)
-        src.dialogue.save(prompt=response_dlg, source=dest.id)
+        try:
+            prompt = src.dialogue.test(f"What do you want to say to me?", dest.id, save=False)
+            prompt_dlg = detect_dialogue(prompt)
+            response = dest.dialogue.test(prompt_dlg, src.id)
+            response_dlg = detect_dialogue(response)
+            src.dialogue.save(prompt=response_dlg, source=dest.id)
+        except:
+            print(f"Warning: Attempted NPC interaction between {src.id} and {dest.id} but could not generate response.")
+            return None
 
         prompts = self.get_npc_text_surfaces(prompt_dlg)
         responses = self.get_npc_text_surfaces(response_dlg)
@@ -192,19 +184,22 @@ class Game:
                     if random.random() < NPC_DIALOGUE_CHANCE:
                         return self.npc_pair_interaction(npc, collide)
         return None
+    
+    def spread(self, source):
+        for npc in self.npcs:
+            if source.real_pos.distance_to(npc.real_pos) <= MAX_SPREAD_DIST:
+                npc.set_run()
 
     def main(self):
         sprites = pygame.sprite.Group()
-
         self.player = Player()
         sprites.add(self.player)
 
-        self.npcs = pygame.sprite.Group([NPC(i,
+        self.npcs = pygame.sprite.Group([NPC(identifier,
                                              self.player.real_pos.x + self.get_random(NPC_SPAWN_RADIUS),
                                              self.player.real_pos.y + self.get_random(NPC_SPAWN_RADIUS))
-                                        for i in range(NUM_NPCS)])
+                                        for identifier in range(NUM_NPCS)])
         sprites.add(self.npcs)
-
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
 
@@ -234,7 +229,7 @@ class Game:
                     self.camera.update_zoom(event.y)
                 if event.type == KEYDOWN:
                     if event.key == K_x:
-                        self.attack_event()
+                        self.player_attack()
             keys = pygame.key.get_pressed()
 
             # In dialogue
