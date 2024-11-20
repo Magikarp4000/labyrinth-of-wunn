@@ -41,6 +41,9 @@ def multitext(text, x, y, w, spacing, font_name='Arial', font_size=FONT_SIZE, co
             lines.append(text[prev: i-1])
             prev = i-1
     lines.append(text[prev:])
+    if pos == 'bottomleft' or pos == 'bottomright' or pos == 'midbottom':
+        lines.reverse()
+    
     for line in lines:
         image, rect = singletext(line, x, y, font_name, font_size, colour, pos, antialias)
         images.append(image)

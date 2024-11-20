@@ -93,6 +93,6 @@ if __name__ == '__main__':
     env = UnitTests(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     env.add_test(env.midbottom_text_init_test, 'init')
-    # env.add_test(env.midbottom_text_test, 'render')
+    env.add_test(env.midbottom_text_test, 'render')
 
     env.main()
