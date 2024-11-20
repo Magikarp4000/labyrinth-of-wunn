@@ -67,7 +67,7 @@ class NPC(pygame.sprite.Sprite):
         self.run = False
         self.speed = NPC_SPEED / TILE_SIZE
 
-    def update(self, player_pos):
+    def update(self, player_pos, *args, **kwargs):
         self.health = max(0, self.health)
         if self.health <= 0:
             self.killed = True

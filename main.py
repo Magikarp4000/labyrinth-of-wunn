@@ -13,7 +13,7 @@ from utils import *
 from dialogue import Dialogue
 from npc import NPC
 from action import *
-from texts import HouseText
+from texts import *
 
 
 INVALID_TILES = [(12, 14), (15, 14)]
@@ -157,6 +157,33 @@ class Game:
                 return collide
         return None
 
+    def get_npc_text_surfaces(self, text):
+        return multitext(text, 0, 0, 300, spacing=20, font_size=15, pos='midbottom')
+
+    def get_texts_from_surfaces(self, target, surfaces, birth):
+        return [NPCText(target, Vector2(rect.x, rect.y) / TILE_SIZE, img, birth) for img, rect in zip(*surfaces)]
+
+    def npc_pair_interaction(self, src, dest):
+        if src.dialogue is None:
+            src.dialogue = Dialogue()
+        if dest.dialogue is None:
+            dest.dialogue = Dialogue()
+        
+        prompt = src.dialogue.test(f"What do you want to say to me?", dest.id, save=False)
+        prompt_dlg = detect_dialogue(prompt)
+        response = dest.dialogue.test(prompt_dlg, src.id)
+        response_dlg = detect_dialogue(response)
+        src.dialogue.save(prompt=response_dlg, source=dest.id)
+
+        prompts = self.get_npc_text_surfaces(prompt_dlg)
+        responses = self.get_npc_text_surfaces(response_dlg)
+        
+        now = time.time()
+        prompt_texts = self.get_texts_from_surfaces(src, prompts, now)
+        response_texts = self.get_texts_from_surfaces(dest, responses, now)
+
+        return prompt_texts + response_texts
+
     def npc_interaction(self):
         for npc in self.npcs:
             if not self.camera.in_frame(npc):
@@ -164,16 +191,7 @@ class Game:
             collide = self.get_collision_within_group(npc, self.npcs)
             if collide is not None:              
                 if random.random() < NPC_DIALOGUE_CHANCE:
-                    if npc.dialogue is None:
-                        npc.dialogue = Dialogue()
-                    if collide.dialogue is None:
-                        collide.dialogue = Dialogue()
-                    prompt = npc.dialogue.test(f"What do you want to say to me?", collide.id, save=False)
-                    response = collide.dialogue.test(prompt, npc.id)
-                    npc.dialogue.save(prompt=response, source=collide.id)
-                    print(npc.id, prompt)
-                    print(collide.id, response)
-                    return multitext(prompt, npc.pos.x, npc.pos.y - 20, 300, 10, font_size=10, pos='center')
+                    return self.npc_pair_interaction(npc, collide)
         return None
 
     def main(self):
@@ -190,7 +208,7 @@ class Game:
 
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
-        npc_buffer = []
+        npc_texts = pygame.sprite.Group()
 
         running = True
         while running:
@@ -232,17 +250,14 @@ class Game:
 
                 now = time.time()
                 if npc_inter is not None:
-                    for obj in zip(*npc_inter):
-                        npc_buffer.append((obj, now))
-                
-                for obj, start_time in npc_buffer:
-                    if now - start_time > NPC_DIALOGUE_TIME:
-                        npc_buffer.remove((obj, start_time))
+                    for text in npc_inter:
+                        npc_texts.add(text)
+                        sprites.add(text)
 
                 # Player movement
                 self.player.move(keys, self.camera.zoom)
                 # Update sprites
-                sprites.update(self.player.real_pos)
+                sprites.update(player_pos=self.player.real_pos, now=now)
                 # Update self.camera
                 self.camera.update()
                 # Rendering
@@ -252,11 +267,12 @@ class Game:
                     self.camera.render(text, text.size, padding=5)
                 self.camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                # print(npc_texts)
+                for text in npc_texts:
+                    self.camera.render(text, text.size, padding=5)
+
                 pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
                                       INFO_PADDING_X, INFO_PADDING_Y)
-                # print(npc_inter)
-                for obj in npc_buffer:
-                    screen.blit(*obj[0])
                 screen.blit(*pos_text)
             pygame.display.flip()
             clock.tick(FPS)
