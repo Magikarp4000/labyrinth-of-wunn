@@ -80,11 +80,15 @@ class UnitTests:
         pygame.quit()
     
     # Unit tests
+    def midbottom_text_base(self):
+        return multitext("hello "*10, self.scr_width / 2, self.scr_height / 2,
+                         NPC_DLG_WIDTH, spacing=NPC_DLG_SPACING, pos='midbottom')
+    
     def midbottom_text_init_test(self):
-        multitext("hello "*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+        self.midbottom_text_base()
 
     def midbottom_text_test(self):
-        texts = multitext("hello "*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+        texts = self.midbottom_text_base()
         for image, rect in zip(*texts):
             self.screen.blit(image, rect)
 
