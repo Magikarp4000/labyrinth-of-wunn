@@ -26,7 +26,7 @@ def detect_action(reply):
         action.friend = obj['action']['friendliness']
         return action
     except:
-        return Action()
+        return None
 
 def detect_dialogue(reply):
     try:
