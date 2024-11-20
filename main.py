@@ -90,11 +90,15 @@ class Game:
         
         return tiles, house_tiles, house_locations, house_texts
 
-    def display_text(self, text):
+    def display_text(self, text, x, y, pos='topleft'):
+        text = singletext(text, x, y, pos=pos)
+        screen.blit(*text)
+
+    def display_dialogue_text(self, text):
         text_images, text_rects = multitext(text, DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), DIALOGUE_YSPACING, 'Arial', FONT_SIZE, BLACK)
         pygame.draw.rect(screen, WHITE, (DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), SCREEN_HEIGHT-DIALOGUE_Y-20))
         for image, rect in zip(text_images, text_rects):
-            screen.blit(image, rect)        
+            screen.blit(image, rect)
     
     def get_collision(self, base, sprites):
         collide = pygame.sprite.spritecollideany(base, sprites)
@@ -237,7 +241,7 @@ class Game:
                 self.interaction(collide)
             # Not in dialogue
             elif self.in_typing:
-                self.display_text(self.typed_text)
+                self.display_dialogue_text(self.typed_text)
             # General
             else:
                 # NPC interaction
@@ -262,9 +266,10 @@ class Game:
                 self.camera.render(self.npc_texts, padding=5)
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
-                pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
-                                      INFO_PADDING_X, INFO_PADDING_Y)
-                screen.blit(*pos_text)
+                self.display_text(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
+                                  INFO_PADDING_X, INFO_PADDING_Y)
+                self.display_text(f"FPS: {round(clock.get_fps(), 2)}",
+                                  SCREEN_WIDTH - INFO_PADDING_X, INFO_PADDING_Y, pos='topright')
             pygame.display.flip()
             clock.tick(FPS)
 
