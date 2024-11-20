@@ -122,14 +122,13 @@ class NPC(pygame.sprite.Sprite):
         self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT)
 
         self.orit = get_orient(direction)
-        ii = 0
         if self.orit == RIGHT:
-            img = self.right[ii].get_image(0)
+            img = self.right[0].get_image()
         if self.orit == UP:
-            img = self.up[ii].get_image(0)
+            img = self.up[0].get_image()
         if self.orit == LEFT:
-            img = self.right[ii].get_image(0)
+            img = self.right[0].get_image()
             img = pygame.transform.flip(img, 1, 0)
         if self.orit == DOWN:
-            img = self.down[ii].get_image(0)
+            img = self.down[0].get_image()
         self.image = img

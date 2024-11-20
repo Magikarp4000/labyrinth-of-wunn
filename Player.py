@@ -88,18 +88,21 @@ class Player(pygame.sprite.Sprite):
         self.rect = rect
 
     def update(self, *args, **kwargs):
-        ii = not self.moving
+        if self.moving:
+            ss_index = 0
+        else:
+            ss_index = 1
         if self.knife > 0:
-            ii = 2
+            ss_index = 2
         if self.orit == 0:
-            img = self.right[ii].get_image(self.tick)
+            img = self.right[ss_index].get_image()
         if self.orit == 1:
-            img = self.up[ii].get_image(self.tick)
+            img = self.up[ss_index].get_image()
         if self.orit == 2:
-            img = self.right[ii].get_image(self.tick)
+            img = self.right[ss_index].get_image()
             img = pygame.transform.flip(img, 1, 0)
         if self.orit == 3:
-            img = self.down[ii].get_image(self.tick)
+            img = self.down[ss_index].get_image()
         self.image = img
 
         self.tick += 1
