@@ -4,6 +4,7 @@ from pygame.math import Vector2
 
 import random
 import time
+import threading
 
 from config import *
 from Camera import Camera
@@ -162,6 +163,11 @@ class Game:
             response = self.get_npc_response(collide)
         if response is not None:
             self.process_npc_response(collide, response)
+    
+    def spread(self, source, dist):
+        for npc in self.npcs:
+            if source.real_pos.distance_to(npc.real_pos) <= dist:
+                npc.set_run()
 
     def get_npc_text_surfaces(self, text):
         return multitext(text, 0, -(NPC_SIZE * self.camera.zoom / 3), NPC_DLG_WIDTH, spacing=NPC_DLG_SPACING,
@@ -201,33 +207,45 @@ class Game:
                 collide = self.get_collision_within_group(npc, self.npcs)
                 if collide is not None:              
                     if random.random() < NPC_DIALOGUE_CHANCE:
+                        print("start")
                         return self.npc_pair_interaction(npc, collide)
         return None
     
-    def spread(self, source, dist):
-        for npc in self.npcs:
-            if source.real_pos.distance_to(npc.real_pos) <= dist:
-                npc.set_run()
+    def npc_thread(self):
+        while self.running:
+            npc_inter = self.npc_interaction()
+            if npc_inter is not None:
+                print("npc interaction done")
+                for text in npc_inter:
+                    self.npc_texts.add(text)
+                    self.sprites.add(text)
+            clock.tick(FPS)
 
     def main(self):
-        sprites = pygame.sprite.Group()
+        self.sprites = pygame.sprite.Group()
         self.player = Player()
-        sprites.add(self.player)
-
+        self.sprites.add(self.player)
         self.npcs = pygame.sprite.Group([NPC(identifier,
                                              self.player.real_pos.x + self.get_random(NPC_SPAWN_RADIUS),
                                              self.player.real_pos.y + self.get_random(NPC_SPAWN_RADIUS))
                                         for identifier in range(NUM_NPCS)])
-        sprites.add(self.npcs)
+        self.sprites.add(self.npcs)
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM, zoom=START_ZOOM)
 
-        running = True
-        while running:
+        self.running = True
+        # while self.running:
+        # t1 = threading.Thread(target=self.game_thread)
+        print("npc thread starting")
+        t2 = threading.Thread(target=self.npc_thread, daemon=True)
+        t2.start()
+
+        while self.running:
             # Event handling
             for event in pygame.event.get():
+                print(event)
                 if event.type == QUIT:
-                    running = False
+                    self.running = False
                 # Dialogue toggler    
                 if event.type == pygame.KEYDOWN:
                     if self.in_typing:
@@ -252,24 +270,18 @@ class Game:
             keys = pygame.key.get_pressed()
 
             # In dialogue
-            if self.in_dialogue and not self.in_typing:
-                self.interaction(collide)
-            # Not in dialogue
-            elif self.in_typing:
-                self.display_dialogue_text(self.typed_text)
+            if self.in_dialogue:
+                if not self.in_typing:
+                    self.interaction(collide)
+                else:
+                    self.display_dialogue_text(self.typed_text)
             # General
             else:
-                # NPC interaction
-                npc_inter = self.npc_interaction()
-                if npc_inter is not None:
-                    for text in npc_inter:
-                        self.npc_texts.add(text)
-                        sprites.add(text)
                 # Player movement
                 self.player.move(keys, self.camera.zoom)
                 # Update sprites
                 now = time.time()
-                sprites.update(player_pos=self.player.real_pos, now=now)
+                self.sprites.update(player_pos=self.player.real_pos, now=now)
                 # Update camera
                 self.camera.update()
                 # Render

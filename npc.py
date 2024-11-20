@@ -61,7 +61,7 @@ class NPC(pygame.sprite.Sprite):
     def reset_run(self):
         self.run = False
         self.speed = NPC_SPEED / TILE_SIZE
-    
+
     def act(self, action, locations):
         if action.location in locations:
             self.good_target = True
