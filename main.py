@@ -42,7 +42,7 @@ class Game:
         self.typed_text = None
         self.wait = False
 
-        self.nps = []
+        self.npc_texts = pygame.sprite.Group()
         self.tiles, self.house_tiles, self.locations, self.house_texts = self.gen_world()
     
     def check_house(self, x, y, house_tiles):
@@ -160,7 +160,7 @@ class Game:
     def get_npc_text_surfaces(self, text):
         return multitext(text, 0, 0, 300, spacing=20, font_size=15, pos='midbottom')
 
-    def get_texts_from_surfaces(self, target, surfaces, birth):
+    def get_textobjects_from_surfaces(self, target, surfaces, birth):
         return [NPCText(target, Vector2(rect.x, rect.y) / TILE_SIZE, img, birth) for img, rect in zip(*surfaces)]
 
     def npc_pair_interaction(self, src, dest):
@@ -179,19 +179,18 @@ class Game:
         responses = self.get_npc_text_surfaces(response_dlg)
         
         now = time.time()
-        prompt_texts = self.get_texts_from_surfaces(src, prompts, now)
-        response_texts = self.get_texts_from_surfaces(dest, responses, now)
+        prompt_texts = self.get_textobjects_from_surfaces(src, prompts, now)
+        response_texts = self.get_textobjects_from_surfaces(dest, responses, now)
 
         return prompt_texts + response_texts
 
     def npc_interaction(self):
         for npc in self.npcs:
-            if not self.camera.in_frame(npc):
-                continue
-            collide = self.get_collision_within_group(npc, self.npcs)
-            if collide is not None:              
-                if random.random() < NPC_DIALOGUE_CHANCE:
-                    return self.npc_pair_interaction(npc, collide)
+            if self.camera.in_frame(npc):
+                collide = self.get_collision_within_group(npc, self.npcs)
+                if collide is not None:              
+                    if random.random() < NPC_DIALOGUE_CHANCE:
+                        return self.npc_pair_interaction(npc, collide)
         return None
 
     def main(self):
@@ -201,14 +200,13 @@ class Game:
         sprites.add(self.player)
 
         self.npcs = pygame.sprite.Group([NPC(i,
-                                             self.player.real_pos.x + self.get_random(SPAWN_RADIUS),
-                                             self.player.real_pos.y + self.get_random(SPAWN_RADIUS))
+                                             self.player.real_pos.x + self.get_random(NPC_SPAWN_RADIUS),
+                                             self.player.real_pos.y + self.get_random(NPC_SPAWN_RADIUS))
                                         for i in range(NUM_NPCS)])
         sprites.add(self.npcs)
 
         self.camera = Camera(self.player, screen, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT, CAMERA_PADDING_X,
                         CAMERA_PADDING_Y, ZOOM_RATE, MAX_ZOOM)
-        npc_texts = pygame.sprite.Group()
 
         running = True
         while running:
@@ -238,32 +236,35 @@ class Game:
                     if event.key == K_x:
                         self.attack_event()
             keys = pygame.key.get_pressed()
+
             # In dialogue
             if self.in_dialogue and not self.in_typing:
                 self.interaction(collide)
             # Not in dialogue
             elif self.in_typing:
                 self.display_text(self.typed_text)
+            # General
             else:
                 # NPC interaction
                 npc_inter = self.npc_interaction()
                 if npc_inter is not None:
                     for text in npc_inter:
-                        npc_texts.add(text)
+                        self.npc_texts.add(text)
                         sprites.add(text)
                 # Player movement
                 self.player.move(keys, self.camera.zoom)
                 # Update sprites
                 now = time.time()
                 sprites.update(player_pos=self.player.real_pos, now=now)
-                # Update self.camera
+                # Update camera
                 self.camera.update()
-                # Rendering
+                # Render
                 self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
                 self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
-                self.camera.render_group(self.house_texts, padding=5)
-                self.camera.render_group(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
-                self.camera.render_group(npc_texts, padding=5)
+
+                self.camera.render(self.house_texts, padding=5)
+                self.camera.render(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
+                self.camera.render(self.npc_texts, padding=5)
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
                 pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",

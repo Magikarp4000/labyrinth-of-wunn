@@ -32,7 +32,7 @@ class Camera:
         self.zoom = clamp(self.zoom + delta_zoom * self.zoom_rate, 1, self.max_zoom)
         self.ratio = self.zoom * self.base_ratio
 
-    def get_obj_pos(self):
+    def clamp_obj_pos(self):
         real_pos = self.obj.real_pos
         pos = self.obj.pos
         
@@ -62,7 +62,7 @@ class Camera:
         return pos
 
     def update(self):
-        self.obj.update_pos(self.get_obj_pos())
+        self.obj.update_pos(self.clamp_obj_pos())
 
         self.real_pos = self.obj.real_pos
         self.pos = self.obj.pos
@@ -74,7 +74,7 @@ class Camera:
         return (self.tl.x - padding <= object.real_pos.x and self.br.x + padding >= object.real_pos.x and
                 self.tl.y - padding <= object.real_pos.y and self.br.y + padding >= object.real_pos.y)
 
-    def render(self, object, obj_size, padding=1):
+    def _render(self, object, obj_size=None, padding=1):
         if self.in_frame(object, padding):
             pos_x = self.pos.x - (self.real_pos.x - object.real_pos.x) * self.ratio
             pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio
@@ -90,13 +90,15 @@ class Camera:
 
             self.screen.blit(object.image, object.rect)
 
-    def render_group(self, objects, obj_size=None, padding=1):
-        for object in objects:
-            if obj_size is None:
-                self.render(object, object.size, padding)
-            else:
-                self.render(object, obj_size, padding)
-
+    def render(self, objects, obj_size=None, padding=1):
+        if hasattr(objects, '__iter__'):
+            for object in objects:
+                if obj_size is None:
+                    self._render(object, object.size, padding)
+                else:
+                    self._render(object, obj_size, padding)
+        else:
+            self._render(objects, obj_size, padding)
     
     def render_tiles(self, objects, obj_size, padding=1):
         for x in range(int(self.tl.x) - padding, int(self.br.x) + padding):
