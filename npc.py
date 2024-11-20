@@ -12,7 +12,6 @@ from pygame.math import Vector2
 from pygame.math import clamp
 import random
 
-NPC_CLEAR_QUEUE = 1
 
 class NPC(pygame.sprite.Sprite):
     def __init__(self, id, x, y):
@@ -50,11 +49,6 @@ class NPC(pygame.sprite.Sprite):
         self.orit = 0
 
         self.friend = 50
-
-    def queue_action(self, action, flags):
-        if flags and NPC_CLEAR_QUEUE:
-            self.actions.clear()
-        self.actions.append(action)
 
     def random_target(self):
         return Vector2(random.randint(0, WORLD_WIDTH - 1), random.randint(0, WORLD_HEIGHT - 1))
