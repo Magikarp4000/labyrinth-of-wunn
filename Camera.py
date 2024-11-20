@@ -32,12 +32,9 @@ class Camera:
         self.zoom = clamp(self.zoom + delta_zoom * self.zoom_rate, 1, self.max_zoom)
         self.ratio = self.zoom * self.base_ratio
 
-    def update_obj(self):
+    def get_obj_pos(self):
         real_pos = self.obj.real_pos
         pos = self.obj.pos
-
-        real_pos.x = clamp(real_pos.x, 0, self.wld_width)
-        real_pos.y = clamp(real_pos.y, 0, self.wld_height)
         
         if (real_pos.x > self.cam_pad_x / self.ratio and
             real_pos.x < self.wld_width - self.cam_pad_x / self.ratio):
@@ -62,13 +59,13 @@ class Camera:
         pos.x = clamp(pos.x, 0, self.scr_width)
         pos.y = clamp(pos.y, 0, self.scr_height)
 
-        return real_pos, pos
+        return pos
 
     def update(self):
-        self.obj.real_pos, self.obj.pos = self.update_obj()
+        self.obj.update_pos(self.get_obj_pos())
 
-        self.pos = self.obj.pos
         self.real_pos = self.obj.real_pos
+        self.pos = self.obj.pos
 
         self.tl = self.real_pos - self.pos / self.base_ratio
         self.br = self.real_pos + ((self.scr_width, self.scr_height) - self.pos) / self.ratio
@@ -82,19 +79,24 @@ class Camera:
             pos_x = self.pos.x - (self.real_pos.x - object.real_pos.x) * self.ratio
             pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio
 
-            object.pos = Vector2(pos_x, pos_y)
+            object.update_pos(Vector2(pos_x, pos_y))
             try:
                 base_image = object.orig_image
             except:
                 base_image = object.image
-            object.image = pygame.transform.scale(base_image, self.zoom * obj_size)
-            object.rect = object.image.get_rect(center=object.pos)
+            image = pygame.transform.scale(base_image, self.zoom * obj_size)
+            rect = image.get_rect(center=object.pos)
+            object.update_disp(image, rect)
 
             self.screen.blit(object.image, object.rect)
 
-    def render_group(self, objects, obj_size, padding=1):
+    def render_group(self, objects, obj_size=None, padding=1):
         for object in objects:
-            self.render(object, obj_size, padding)
+            if obj_size is None:
+                self.render(object, object.size, padding)
+            else:
+                self.render(object, obj_size, padding)
+
     
     def render_tiles(self, objects, obj_size, padding=1):
         for x in range(int(self.tl.x) - padding, int(self.br.x) + padding):

@@ -247,29 +247,24 @@ class Game:
             else:
                 # NPC interaction
                 npc_inter = self.npc_interaction()
-
-                now = time.time()
                 if npc_inter is not None:
                     for text in npc_inter:
                         npc_texts.add(text)
                         sprites.add(text)
-
                 # Player movement
                 self.player.move(keys, self.camera.zoom)
                 # Update sprites
+                now = time.time()
                 sprites.update(player_pos=self.player.real_pos, now=now)
                 # Update self.camera
                 self.camera.update()
                 # Rendering
                 self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
                 self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
-                for text in self.house_texts:
-                    self.camera.render(text, text.size, padding=5)
-                self.camera.render_group(self.npcs, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+                self.camera.render_group(self.house_texts, padding=5)
+                self.camera.render_group(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
+                self.camera.render_group(npc_texts, padding=5)
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-                # print(npc_texts)
-                for text in npc_texts:
-                    self.camera.render(text, text.size, padding=5)
 
                 pos_text = singletext(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
                                       INFO_PADDING_X, INFO_PADDING_Y)

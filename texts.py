@@ -16,6 +16,13 @@ class HouseText:
         self.rect = self.image.get_rect()
 
         self.size = Vector2(self.image.get_width(), self.image.get_height())
+    
+    def update_pos(self, pos):
+        self.pos = pos
+    
+    def update_disp(self, image, rect):
+        self.image = image
+        self.rect = rect
 
 
 class NPCText(pygame.sprite.Sprite):
@@ -26,15 +33,21 @@ class NPCText(pygame.sprite.Sprite):
         self.birth = birth
 
         self.real_pos = obj.real_pos + self.offset
-        self.pos = obj.pos
+        self.pos = Vector2(0, 0)
 
         self.orig_image = image
         self.image = image
 
         self.size = Vector2(image.get_width(), image.get_height())
     
+    def update_pos(self, pos):
+        self.pos = pos
+    
+    def update_disp(self, image, rect):
+        self.image = image
+        self.rect = rect
+
     def update(self, now, *args, **kwargs):
         self.real_pos = self.obj.real_pos + self.offset
-        self.pos = self.obj.pos
         if now - self.birth > NPC_DIALOGUE_TIME:
             self.kill()

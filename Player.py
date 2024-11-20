@@ -69,12 +69,22 @@ class Player(pygame.sprite.Sprite):
         direction = self.get_direction(keys)
         self.real_pos += direction * CAMERA_SPEED
         self.pos += direction * self.speed * zoom
+
+        self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH)
+        self.real_pos.y = clamp(self.real_pos.y, 0, WORLD_HEIGHT)
         
         orit = get_orient_discrete(direction)
         if orit is not None:
             self.orit = orit
         if abs(direction.x) + abs(direction.y) > 0:
             self.moving = True
+    
+    def update_pos(self, pos):
+        self.pos = pos
+    
+    def update_disp(self, image, rect):
+        self.image = image
+        self.rect = rect
 
     def update(self, *args, **kwargs):
         ii = not self.moving

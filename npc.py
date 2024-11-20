@@ -67,6 +67,13 @@ class NPC(pygame.sprite.Sprite):
         self.run = False
         self.speed = NPC_SPEED / TILE_SIZE
 
+    def update_pos(self, pos):
+        self.pos = pos
+    
+    def update_disp(self, image, rect):
+        self.image = image
+        self.rect = rect
+
     def update(self, player_pos, *args, **kwargs):
         self.health = max(0, self.health)
         if self.health <= 0:
