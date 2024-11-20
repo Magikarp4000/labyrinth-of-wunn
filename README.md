@@ -1,4 +1,4 @@
-# CamHack24: Labyrinth of Wunn
+# Labyrinth of Wunn
 
 ## Setup
 1. Install requirements: ```pip install -r requirements.txt```
