@@ -20,11 +20,12 @@ class NPC(pygame.sprite.Sprite):
 
         self.sus = 0
         self.actions = deque()
-        self.dialogue = None
         self.killed = False
         self.health = NPC_HEALTH
         self.dmg = NPC_DMG
         self.speed = NPC_SPEED / TILE_SIZE
+
+        self.dialogue = None
 
         spritesheet = Spritesheet("assets/Cute_Fantasy_Free/Enemies/Skeleton.png", 32)
 
@@ -69,12 +70,10 @@ class NPC(pygame.sprite.Sprite):
             self.set_run()
         elif action.t == ACTION_SCREAM:
             self.set_run()
-            self.spread(self)
         elif action.t == ACTION_WALK:
             self.reset_run()
         elif action.t == ACTION_DIE:
             self.health = 0
-            self.spread(self)
         self.friend = action.friend
 
     def update_pos(self, pos):

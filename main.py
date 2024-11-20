@@ -128,7 +128,7 @@ class Game:
         if collide is not None:
             collide.health -= self.player.dmg
             collide.set_run()
-            self.spread(collide)
+            self.spread(source=collide, dist=SCREAM_SPREAD)
 
     def get_npc_response(self, npc):
         if npc.dialogue is None:
@@ -149,7 +149,11 @@ class Game:
         self.display_dialogue_text(detect_dialogue(response))
         action = detect_action(response)
         if action is not None:
-            npc.act(detect_action(response), self.locations)
+            npc.act(action, self.locations)
+            if action.t == ACTION_SCREAM:
+                self.spread(source=npc, dist=SCREAM_SPREAD)
+            elif action.t == ACTION_DIE:
+                self.spread(source=npc, dist=DIE_SPREAD)
         self.wait = True
 
     def interaction(self, collide):
@@ -200,9 +204,9 @@ class Game:
                         return self.npc_pair_interaction(npc, collide)
         return None
     
-    def spread(self, source):
+    def spread(self, source, dist):
         for npc in self.npcs:
-            if source.real_pos.distance_to(npc.real_pos) <= MAX_SPREAD_DIST:
+            if source.real_pos.distance_to(npc.real_pos) <= dist:
                 npc.set_run()
 
     def main(self):

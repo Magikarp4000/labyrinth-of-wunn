@@ -81,10 +81,10 @@ class UnitTests:
     
     # Unit tests
     def midbottom_text_init_test(self):
-        multitext("hello"*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+        multitext("hello "*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
 
     def midbottom_text_test(self):
-        texts = multitext("hello"*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
+        texts = multitext("hello "*10, self.scr_width / 2, self.scr_height / 2, 300, spacing=25, pos='midbottom')
         for image, rect in zip(*texts):
             self.screen.blit(image, rect)
 

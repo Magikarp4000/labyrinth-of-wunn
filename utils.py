@@ -36,10 +36,13 @@ def multitext(text, x, y, w, spacing, font_name='Arial', font_size=FONT_SIZE, co
 
     font = pygame.font.SysFont(font_name, font_size)
     prev = 0
+    prev_space = 0
     for i in range(1, len(text)):
         if font.size(text[prev: i])[0] >= w:
-            lines.append(text[prev: i-1])
-            prev = i-1
+            lines.append(text[prev: prev_space])
+            prev = prev_space + 1
+        if text[i] == " ":
+            prev_space = i
     lines.append(text[prev:])
     if pos == 'bottomleft' or pos == 'bottomright' or pos == 'midbottom':
         lines.reverse()
