@@ -99,6 +99,12 @@ class Game:
         pygame.draw.rect(screen, WHITE, (DIALOGUE_X, DIALOGUE_Y, SCREEN_WIDTH-(2*DIALOGUE_X), SCREEN_HEIGHT-DIALOGUE_Y-20))
         for image, rect in zip(text_images, text_rects):
             screen.blit(image, rect)
+
+    def display_info(self):
+        self.display_text(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
+                          INFO_PADDING_X, INFO_PADDING_Y)
+        self.display_text(f"FPS: {round(clock.get_fps(), 2)}",
+                          SCREEN_WIDTH - INFO_PADDING_X, INFO_PADDING_Y, pos='topright')
     
     def get_collision(self, base, sprites):
         collide = pygame.sprite.spritecollideany(base, sprites)
@@ -138,8 +144,8 @@ class Game:
         return response
     
     def process_npc_response(self, npc, response):
-        self.display_text(detect_dialogue(response))
-        npc.act(detect_action(response))
+        self.display_dialogue_text(detect_dialogue(response))
+        npc.act(detect_action(response), self.locations)
         self.wait = True
 
     def interaction(self, collide):
@@ -150,7 +156,7 @@ class Game:
             self.process_npc_response(collide, response)
 
     def get_npc_text_surfaces(self, text):
-        return multitext(text, 0, 0, 300, spacing=20, font_size=15, pos='midbottom')
+        return multitext(text, 0, -(NPC_SIZE * self.camera.zoom / 3), 300, spacing=20, font_size=15, pos='bottomleft')
 
     def get_textobjects_from_surfaces(self, target, surfaces, birth):
         return [NPCText(target, Vector2(rect.x, rect.y) / TILE_SIZE, img, birth) for img, rect in zip(*surfaces)]
@@ -266,10 +272,8 @@ class Game:
                 self.camera.render(self.npc_texts, padding=5)
                 self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
-                self.display_text(f"Coords: ({round(self.player.real_pos[0], 1)}, {round(self.player.real_pos[1], 1)})",
-                                  INFO_PADDING_X, INFO_PADDING_Y)
-                self.display_text(f"FPS: {round(clock.get_fps(), 2)}",
-                                  SCREEN_WIDTH - INFO_PADDING_X, INFO_PADDING_Y, pos='topright')
+                self.display_info()
+
             pygame.display.flip()
             clock.tick(FPS)
 

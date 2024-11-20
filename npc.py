@@ -61,10 +61,10 @@ class NPC(pygame.sprite.Sprite):
         self.run = False
         self.speed = NPC_SPEED / TILE_SIZE
     
-    def act(self, action):
-        if action.location in self.locations:
+    def act(self, action, locations):
+        if action.location in locations:
             self.good_target = True
-            self.target = self.locations[action.location]
+            self.target = locations[action.location]
         if action.t == ACTION_RUN:
             self.set_run()
         elif action.t == ACTION_SCREAM:
