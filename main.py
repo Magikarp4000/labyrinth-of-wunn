@@ -27,7 +27,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 class Game:
     def __init__(self):
-        self.in_dialogue = False
         try:
             pygame.mixer.init()
             self.music = pygame.mixer.Sound("assets/music/m.wav")
@@ -35,17 +34,17 @@ class Game:
         except:
             pass
 
-        self.zoom = 1
-
-        self.tile_size = TILE_SIZE
-
+        # World gen
+        self.tiles, self.house_tiles, self.locations, self.house_texts = self.gen_world()
+        
+        # Player-NPC interaction
         self.in_dialogue = False
         self.in_typing = False
         self.typed_text = None
+        self.collide = None
         self.wait = False
 
-        self.tiles, self.house_tiles, self.locations, self.house_texts = self.gen_world()
-
+        # Sprites
         self.sprites = pygame.sprite.Group()
 
         self.player = Player()
@@ -62,6 +61,13 @@ class Game:
 
         self.npc_texts = pygame.sprite.Group()
         self.sprites.add(self.npc_texts)
+
+        # Admin
+        self.admin = False
+        self.npc_tp_idx = 0
+        self.npc_inter_flag = True
+        self.npc_inter_chance = NPC_DIALOGUE_CHANCE
+        self.buffer = None
     
     def check_house(self, x, y, house_tiles):
         for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
@@ -85,7 +91,7 @@ class Game:
                 while (x, y) in INVALID_TILES:
                     x = random.randint(0, tilesheet.w - 1)
                     y = random.randint(0, tilesheet.h - 1)
-                tile = scale_image(tilesheet.get_image(x, y), self.tile_size)
+                tile = scale_image(tilesheet.get_image(x, y), TILE_SIZE)
                 tiles[i, j] = tile
         
         # Houses
@@ -147,11 +153,11 @@ class Game:
             collide.set_run()
             self.spread(source=collide, dist=SCREAM_SPREAD)
 
-    def get_npc_response(self, npc):
+    def get_npc_response(self, npc: NPC):
         if npc.dialogue is None:
             npc.dialogue = Dialogue()
         if 'user' not in npc.dialogue.memory:
-            response = npc.dialogue.test("Hi! Briefly introduce yourself.")
+            response = npc.dialogue.test("Hi. Briefly introduce yourself.")
         else:
             if self.typed_text is None:
                 self.in_typing = True
@@ -162,25 +168,27 @@ class Game:
                 self.typed_text = None
         return response
     
-    def process_npc_response(self, npc, response):
+    def process_npc_response(self, npc: NPC, response):
         self.display_dialogue_text(detect_dialogue(response))
         action = detect_action(response)
         if action is not None:
-            npc.act(action, self.locations)
+            if action.location in self.locations:
+                npc.set_target(self.locations[action.location])
+            npc.act(action)
             if action.t == ACTION_SCREAM:
                 self.spread(source=npc, dist=SCREAM_SPREAD)
             elif action.t == ACTION_DIE:
                 self.spread(source=npc, dist=DIE_SPREAD)
         self.wait = True
 
-    def interaction(self, collide):
+    def interact(self, npc: NPC):
         response = None
         if not self.wait:
-            response = self.get_npc_response(collide)
+            response = self.get_npc_response(npc)
         if response is not None:
-            self.process_npc_response(collide, response)
+            self.process_npc_response(npc, response)
     
-    def spread(self, source, dist):
+    def spread(self, source: NPC, dist):
         for npc in self.npcs:
             if source.real_pos.distance_to(npc.real_pos) <= dist:
                 npc.set_run()
@@ -192,7 +200,7 @@ class Game:
     def get_textobjects_from_surfaces(self, target, surfaces, birth):
         return [NPCText(target, Vector2(rect.x, rect.y) / TILE_SIZE, img, birth) for img, rect in zip(*surfaces)]
 
-    def npc_pair_interaction(self, src, dest):
+    def npc_pair_interaction(self, src: NPC, dest: NPC):
         if src.dialogue is None:
             src.dialogue = Dialogue()
         if dest.dialogue is None:
@@ -201,13 +209,11 @@ class Game:
         try:
             src.stop()
             dest.stop()
-
             prompt = src.dialogue.test(f"What do you want to say to me?", dest.id, save=False)
             prompt_dlg = detect_dialogue(prompt)
             response = dest.dialogue.test(prompt_dlg, src.id)
             response_dlg = detect_dialogue(response)
             src.dialogue.save(prompt=response_dlg, source=dest.id)
-
             src.start()
             dest.start()
         except:
@@ -228,8 +234,7 @@ class Game:
             if self.camera.in_frame(npc):
                 collide = self.get_collision_within_group(npc, self.npcs)
                 if collide is not None:              
-                    if random.random() < NPC_DIALOGUE_CHANCE:
-                        print("start")
+                    if random.random() < self.npc_inter_chance:
                         return self.npc_pair_interaction(npc, collide)
         return None
     
@@ -238,11 +243,91 @@ class Game:
         while self.running:
             npc_inter = self.npc_interaction()
             if npc_inter is not None:
-                print("npc interaction done")
                 for text in npc_inter:
                     self.npc_texts.add(text)
                     self.sprites.add(text)
             thread_clock.tick(FPS)
+
+    def toggle_admin(self):
+        self.admin = not self.admin
+        self.player.toggle_admin()
+        text = "Admin " + ("Activated >:)))" if self.admin else "Deactivated")
+        self.buffer = (singletext(text, SCREEN_WIDTH / 2, INFO_PADDING_Y, font_size=ADMIN_TEXT_SIZE, pos='midtop'),
+                       time.time(), ADMIN_TEXT_LIFE)
+    
+    def toggle_npc_interaction(self):
+        self.npc_inter_flag = not self.npc_inter_flag
+        if self.npc_inter_flag:
+            self.npc_inter_chance = NPC_DIALOGUE_CHANCE
+        else:
+            self.npc_inter_chance = 0
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.running = False
+            # Dialogue toggler    
+            if event.type == KEYDOWN:
+                if self.in_typing:
+                    if event.key == K_RETURN:
+                        self.in_typing = False
+                    elif event.key == K_BACKSPACE:
+                        self.typed_text = self.typed_text[:-1]
+                    else:
+                        self.typed_text += event.unicode
+                    continue
+                if event.key == K_SPACE:
+                    self.collide = self.get_collision(self.player, self.npcs)
+                    if self.collide is not None:
+                        self.in_dialogue = not self.in_dialogue
+                        self.wait = False
+            # End of dialogue toggler
+            if not self.in_dialogue:
+                if event.type == MOUSEWHEEL:
+                    self.camera.update_zoom(event.y)
+                if event.type == KEYDOWN:
+                    if event.key == K_x:
+                        self.player_attack()
+                    # Toggle admin
+                    if event.key == K_g:
+                        self.toggle_admin()
+                    # Admin
+                    if self.admin:
+                        # Teleport
+                        if event.key == K_t:
+                            npc = self.npcs.sprites()[self.npc_tp_idx]
+                            self.player.teleport(npc.real_pos.copy())
+                            self.npc_tp_idx = (self.npc_tp_idx + 1) % len(self.npcs)
+                        # Spawn NPC
+                        if event.key == K_f:
+                            npc = NPC(len(self.npcs), *self.player.real_pos)
+                            self.npcs.add(npc)
+                            self.sprites.add(npc)
+                            # Spawn NPC
+                        if event.key == K_k:
+                            for npc in self.npcs:
+                                npc.kill()
+                        # Toggle cross-NPC interaction
+                        if event.key == K_r:
+                            self.toggle_npc_interaction()
+
+    def render(self):
+        self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
+        self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
+
+        self.camera.render(self.house_texts, padding=5)
+        self.camera.render(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
+        self.camera.render(self.npc_texts, padding=5)
+        self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+
+        if self.buffer is not None:
+            item, birth, life = self.buffer
+            if time.time() - birth > life:
+                self.buffer = None
+            else:
+                screen.blit(*item)
+        
+        self.display_info()
 
     def main(self):
         self.running = True
@@ -252,57 +337,24 @@ class Game:
 
         while self.running:
             # Event handling
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.running = False
-                # Dialogue toggler    
-                if event.type == pygame.KEYDOWN:
-                    if self.in_typing:
-                        if event.key == pygame.K_RETURN:
-                            self.in_typing = False
-                        elif event.key == pygame.K_BACKSPACE:
-                            self.typed_text = self.typed_text[:-1]
-                        else:
-                            self.typed_text += event.unicode
-                        continue
-                    if event.key == pygame.K_SPACE:
-                        collide = self.get_collision(self.player, self.npcs)
-                        if collide is not None:
-                            self.in_dialogue = not self.in_dialogue
-                            self.wait = False
-                # End of dialogue toggler
-                if event.type == MOUSEWHEEL:
-                    self.camera.update_zoom(event.y)
-                if event.type == KEYDOWN:
-                    if event.key == K_x:
-                        self.player_attack()
+            self.handle_events()
             keys = pygame.key.get_pressed()
 
+            # Updates
             # In dialogue
             if self.in_dialogue:
-                if not self.in_typing:
-                    self.interaction(collide)
+                if not self.in_typing and self.collide is not None:
+                    self.interact(self.collide)
                 else:
                     self.display_dialogue_text(self.typed_text)
             # General
             else:
-                # Player movement
                 self.player.move(keys, self.camera.zoom)
-                # Update sprites
-                now = time.time()
-                self.sprites.update(player_pos=self.player.real_pos, now=now)
-                # Update camera
+                self.sprites.update(player_pos=self.player.real_pos, now=time.time())
                 self.camera.update()
-                # Render
-                self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
-                self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
-
-                self.camera.render(self.house_texts, padding=5)
-                self.camera.render(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
-                self.camera.render(self.npc_texts, padding=5)
-                self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
-
-                self.display_info()
+                
+                # Rendering
+                self.render()
 
             pygame.display.flip()
             clock.tick(FPS)

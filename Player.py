@@ -23,6 +23,7 @@ class Player(pygame.sprite.Sprite):
 
         self.real_pos = Vector2(WORLD_WIDTH / 2, WORLD_HEIGHT / 2)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.tp_enable = False
 
         spritesheet = Spritesheet("assets/Player/Player.png", 32)
 
@@ -39,6 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.moving = False
         self.knife = 0
 
+        self.admin = False
+
         try:
             self.swing = pygame.mixer.Sound("assets/music/07_human_atk_sword_1.wav")
         except:
@@ -51,6 +54,13 @@ class Player(pygame.sprite.Sprite):
             self.swing.play(0)
         except:
             pass
+    
+    def toggle_admin(self):
+        self.admin = not self.admin
+        if self.admin:
+            self.speed = ADMIN_SPEED
+        else:
+            self.speed = PLAYER_SPEED
 
     def get_direction(self, keys):
         direction = Vector2(0, 0)
@@ -67,8 +77,9 @@ class Player(pygame.sprite.Sprite):
         return direction
     
     def move(self, keys, zoom):
+        self.real_speed = self.speed / TILE_SIZE
         direction = self.get_direction(keys)
-        self.real_pos += direction * CAMERA_SPEED
+        self.real_pos += direction * self.real_speed
         self.pos += direction * self.speed * zoom
 
         self.real_pos.x = clamp(self.real_pos.x, 0, WORLD_WIDTH)
@@ -80,6 +91,10 @@ class Player(pygame.sprite.Sprite):
         if abs(direction.x) + abs(direction.y) > 0:
             self.moving = True
     
+    def teleport(self, real_pos):
+        if self.admin:
+            self.real_pos = real_pos
+
     def update_pos(self, pos):
         self.pos = pos
     

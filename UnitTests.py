@@ -69,7 +69,7 @@ class UnitTests:
             self.player.move(keys, self.camera.zoom)
             self.player.update()
             self.camera.update()
-            # Render
+            # Rendering
             self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
             self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
