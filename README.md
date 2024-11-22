@@ -17,5 +17,5 @@
 ## Demos
 ![Player dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/player_dialogue.png)
 ![NPC dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/npc_dialogue.png)
-https://github.com/user-attachments/assets/1f97cf41-dc68-4c16-8379-771d1151a824
+![Demo video 1](https://github.com/user-attachments/assets/1f97cf41-dc68-4c16-8379-771d1151a824)
 https://github.com/user-attachments/assets/e1b6bc58-edfe-43b0-8486-521355933122
