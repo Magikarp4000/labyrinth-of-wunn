@@ -241,11 +241,12 @@ class Game:
     def npc_thread(self):
         thread_clock = pygame.time.Clock()
         while self.running:
-            npc_inter = self.npc_interaction()
-            if npc_inter is not None:
-                for text in npc_inter:
-                    self.npc_texts.add(text)
-                    self.sprites.add(text)
+            if not self.in_dialogue:
+                npc_inter = self.npc_interaction()
+                if npc_inter is not None:
+                    for text in npc_inter:
+                        self.npc_texts.add(text)
+                        self.sprites.add(text)
             thread_clock.tick(FPS)
 
     def toggle_admin(self):
