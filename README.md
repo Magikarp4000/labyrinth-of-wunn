@@ -13,3 +13,9 @@
 ## Run
 1. Change to root directory (labyrinth-of-wunn)
 2. Run `main.py`
+
+## Demos
+https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/player_dialogue.png
+https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/npc_dialogue.png
+https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/demo1.mp4
+https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/demo2.mp4
