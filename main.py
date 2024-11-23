@@ -67,7 +67,7 @@ class Game:
         self.npc_tp_idx = 0
         self.npc_inter_flag = True
         self.npc_inter_chance = NPC_DIALOGUE_CHANCE
-        self.buffer = None
+        self.admin_buffer = None
     
     def check_house(self, x, y, house_tiles):
         for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
@@ -249,13 +249,21 @@ class Game:
                         self.sprites.add(text)
             thread_clock.tick(FPS)
 
+    def display_buffer(self, buffer):
+        if buffer is not None:
+            item, birth, life = buffer
+            if time.time() - birth > life:
+                buffer = None
+            else:
+                screen.blit(*item)
+
     def toggle_admin(self):
         self.admin = not self.admin
         self.player.toggle_admin()
-        text = "Admin " + ("Activated >:)))" if self.admin else "Deactivated")
-        self.buffer = (singletext(text, SCREEN_WIDTH / 2, INFO_PADDING_Y, font_size=ADMIN_TEXT_SIZE, pos='midtop'),
+        text = "Admin " + ("Activated" if self.admin else "Deactivated")
+        self.admin_buffer = (singletext(text, SCREEN_WIDTH / 2, INFO_PADDING_Y, font_size=ADMIN_TEXT_SIZE, pos='midtop'),
                        time.time(), ADMIN_TEXT_LIFE)
-    
+
     def toggle_npc_interaction(self):
         self.npc_inter_flag = not self.npc_inter_flag
         if self.npc_inter_flag:
@@ -321,13 +329,7 @@ class Game:
         self.camera.render(self.npc_texts, padding=5)
         self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
 
-        if self.buffer is not None:
-            item, birth, life = self.buffer
-            if time.time() - birth > life:
-                self.buffer = None
-            else:
-                screen.blit(*item)
-        
+        self.display_buffer(self.admin_buffer)
         self.display_info()
 
     def main(self):
