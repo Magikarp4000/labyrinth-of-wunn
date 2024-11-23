@@ -91,12 +91,17 @@ class UnitTests:
         texts = self.midbottom_text_base()
         for image, rect in zip(*texts):
             self.screen.blit(image, rect)
-
+    
+    def hollow_rect_test(self):
+        pygame.draw.rect(self.screen, BLACK,
+                         (SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
+                         width=3)
 
 if __name__ == '__main__':
     env = UnitTests(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     env.add_test(env.midbottom_text_init_test, 'init')
     env.add_test(env.midbottom_text_test, 'render')
+    env.add_test(env.hollow_rect_test, 'render')
 
     env.main()
