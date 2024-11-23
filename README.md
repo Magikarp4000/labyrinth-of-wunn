@@ -27,6 +27,10 @@
 - H: Toggle hitboxes
 - R: Toggle cross-NPC interaction (useful for testing without sending API requests)
 
+## Information
+- Model: llama-3.1-8b-instant
+- Game environment: pygame
+
 ## Demos
 ![Player dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/player_dialogue.png)
 ![NPC dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/npc_dialogue.png)
