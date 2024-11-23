@@ -19,7 +19,7 @@
 2. Run `main.py`
 
 ## Controls
-- WASD or arrow keys: Movement
+- WASD/arrow keys: Movement
 - Enter: Interact
 - X: Attack
 - Mouse wheel: Zoom
