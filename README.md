@@ -1,5 +1,9 @@
 # Labyrinth of Wunn
 
+## Information
+- Model: llama-3.1-8b-instant
+- Framework: pygame
+
 ## Setup
 1. Install requirements: ```pip install -r requirements.txt```
 2. Create an account and setup an API key here: https://console.groq.com/keys
@@ -26,10 +30,6 @@
 - K: Remove all NPCs
 - H: Toggle hitboxes
 - R: Toggle cross-NPC interaction (useful for testing without sending API requests)
-
-## Information
-- Model: llama-3.1-8b-instant
-- Game environment: pygame
 
 ## Demos
 ![Player dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/player_dialogue.png)
