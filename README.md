@@ -14,6 +14,19 @@
 1. Change to root directory (labyrinth-of-wunn)
 2. Run `main.py`
 
+## Controls
+- WASD or arrow keys: Movement
+- Space: Interact
+- Enter: Enter response
+- X: Attack
+- Mouse wheel: Zoom
+### Admin mode
+- G: Toggle admin mode
+- T: Teleport to NPC (cycles through each one)
+- F: Spawn NPC
+- K: Remove all NPCs
+- R: Toggle cross-NPC interaction (useful for testing without sending API requests)
+
 ## Demos
 ![Player dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/player_dialogue.png)
 ![NPC dialogue](https://github.com/Magikarp4000/labyrinth-of-wunn/blob/main/demos/npc_dialogue.png)
