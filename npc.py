@@ -39,7 +39,7 @@ class NPC(pygame.sprite.Sprite):
         self.kill_anim = Animation(spritesheet, 20, [36, 37, 38] + [39] * 8000)
 
         self.real_pos = Vector2(x, y)
-        self.pos = Vector2(INF, INF)
+        self.pos = Vector2(-INF, -INF)
 
         self.image = pygame.transform.scale(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=self.pos)
