@@ -16,8 +16,7 @@
 
 ## Controls
 - WASD or arrow keys: Movement
-- Space: Interact
-- Enter: Enter response
+- Enter: Interact
 - X: Attack
 - Mouse wheel: Zoom
 ### Admin mode
