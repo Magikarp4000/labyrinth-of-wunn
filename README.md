@@ -1,8 +1,8 @@
 # Labyrinth of Wunn
 
 ## Information
-- Model: llama-3.1-8b-instant
-- Framework: pygame
+- Model: Llama-3.1-8b-instant
+- Framework: Pygame
 
 ## Setup
 1. Install requirements: ```pip install -r requirements.txt```
