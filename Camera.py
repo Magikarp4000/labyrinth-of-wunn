@@ -76,19 +76,18 @@ class Camera:
                 self.tl.y - padding <= object.real_pos.y and self.br.y + padding >= object.real_pos.y)
 
     def _render(self, object, obj_size, padding=1):
+        pos_x = self.pos.x - (self.real_pos.x - object.real_pos.x) * self.ratio
+        pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio        
+        object.update_pos(Vector2(pos_x, pos_y))
+        try:
+            base_image = object.orig_image
+        except:
+            base_image = object.image
+        image = pygame.transform.scale(base_image, self.zoom * obj_size)
+        rect = image.get_rect(center=object.pos)
+        object.update_disp(image, rect)
+    
         if self.in_frame(object, padding):
-            pos_x = self.pos.x - (self.real_pos.x - object.real_pos.x) * self.ratio
-            pos_y = self.pos.y - (self.real_pos.y - object.real_pos.y) * self.ratio
-
-            object.update_pos(Vector2(pos_x, pos_y))
-            try:
-                base_image = object.orig_image
-            except:
-                base_image = object.image
-            image = pygame.transform.scale(base_image, self.zoom * obj_size)
-            rect = image.get_rect(center=object.pos)
-            object.update_disp(image, rect)
-
             self.screen.blit(object.image, object.rect)
 
     def render(self, objects, obj_size=None, padding=1):
