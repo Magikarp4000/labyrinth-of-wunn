@@ -64,10 +64,11 @@ class Game:
 
         # Admin
         self.admin = False
+        self.admin_buffer = None
         self.npc_tp_idx = 0
         self.npc_inter_flag = True
         self.npc_inter_chance = NPC_DIALOGUE_CHANCE
-        self.admin_buffer = None
+        self.hitbox_flag = False
     
     def check_house(self, x, y, house_tiles):
         for i in range(x - HOUSE_WIDTH // TILE_SIZE, x + HOUSE_WIDTH // TILE_SIZE):
@@ -249,6 +250,9 @@ class Game:
                         self.sprites.add(text)
             thread_clock.tick(FPS)
 
+    def display_hitbox(self, obj, colour=BLACK):
+        pygame.draw.rect(screen, colour, obj.rect, width=HITBOX_WIDTH)
+
     def display_buffer(self, buffer):
         if buffer is not None:
             item, birth, life = buffer
@@ -259,6 +263,7 @@ class Game:
 
     def toggle_admin(self):
         self.admin = not self.admin
+        self.hitbox_flag = True
         self.player.toggle_admin()
         text = "Admin " + ("Activated" if self.admin else "Deactivated")
         self.admin_buffer = (singletext(text, SCREEN_WIDTH / 2, INFO_PADDING_Y, font_size=ADMIN_TEXT_SIZE, pos='midtop'),
@@ -270,6 +275,9 @@ class Game:
             self.npc_inter_chance = NPC_DIALOGUE_CHANCE
         else:
             self.npc_inter_chance = 0
+    
+    def toggle_hitbox(self):
+        self.hitbox_flag = not self.hitbox_flag
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -312,13 +320,16 @@ class Game:
                             npc = NPC(len(self.npcs), *self.player.real_pos)
                             self.npcs.add(npc)
                             self.sprites.add(npc)
-                            # Spawn NPC
+                        # Remove all NPCs
                         if event.key == K_k:
                             for npc in self.npcs:
                                 npc.kill()
                         # Toggle cross-NPC interaction
                         if event.key == K_r:
                             self.toggle_npc_interaction()
+                        # Toggle hitbox
+                        if event.key == K_h:
+                            self.toggle_hitbox()
 
     def render(self):
         self.camera.render_tiles(self.tiles, Vector2(TILE_SIZE, TILE_SIZE), padding=2)
@@ -328,6 +339,11 @@ class Game:
         self.camera.render(self.npcs)
         self.camera.render(self.npc_texts, padding=5)
         self.camera.render(self.player)
+
+        if self.admin and self.hitbox_flag:
+            for npc in self.npcs:
+                self.display_hitbox(npc, RED)
+            self.display_hitbox(self.player, BLUE)
 
         self.display_buffer(self.admin_buffer)
         self.display_info()
