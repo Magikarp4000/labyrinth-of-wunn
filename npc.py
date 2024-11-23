@@ -52,6 +52,8 @@ class NPC(pygame.sprite.Sprite):
         self.run = False
         self.orit = 0
 
+        self.kill_time = 0
+
         self.friend = 50
 
     def random_target(self):
@@ -106,10 +108,13 @@ class NPC(pygame.sprite.Sprite):
 
     def update(self, player_pos, now, *args, **kwargs):
         self.health = max(0, self.health)
-        if self.health <= 0:
+        if self.health <= 0 and not self.killed:
             self.killed = True
+            self.kill_time = now
         
         if self.killed:
+            if now - self.kill_time > NPC_DEATH_TIME:
+                self.kill()
             img = self.kill_anim.get_image()
             self.image = pygame.transform.scale(img, self.size)
             self.rect = self.image.get_rect(center=self.pos)
