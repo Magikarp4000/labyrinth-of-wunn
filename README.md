@@ -25,6 +25,7 @@
 - T: Teleport to NPC (cycles through each one)
 - F: Spawn NPC
 - K: Remove all NPCs
+- H: Toggle hitboxes
 - R: Toggle cross-NPC interaction (useful for testing without sending API requests)
 
 ## Demos
