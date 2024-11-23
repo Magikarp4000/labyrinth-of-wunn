@@ -312,9 +312,10 @@ class Game:
                     if self.admin:
                         # Teleport
                         if event.key == K_t:
-                            npc = self.npcs.sprites()[self.npc_tp_idx]
-                            self.player.teleport(npc.real_pos.copy())
-                            self.npc_tp_idx = (self.npc_tp_idx + 1) % len(self.npcs)
+                            if self.npcs:
+                                npc = self.npcs.sprites()[self.npc_tp_idx]
+                                self.player.teleport(npc.real_pos.copy())
+                                self.npc_tp_idx = (self.npc_tp_idx + 1) % len(self.npcs)
                         # Spawn NPC
                         if event.key == K_f:
                             npc = NPC(len(self.npcs), *self.player.real_pos)
