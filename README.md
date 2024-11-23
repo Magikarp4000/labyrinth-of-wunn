@@ -2,7 +2,7 @@
 
 ## Setup
 1. Install requirements: ```pip install -r requirements.txt```
-2. Create an account and setup API key here: https://console.groq.com/keys
+2. Create an account and setup an API key here: https://console.groq.com/keys
 3. Create a file named `secrets.yaml`
 4. In `secrets.yaml`, write:
    ```
