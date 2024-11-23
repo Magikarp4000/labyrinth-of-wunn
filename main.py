@@ -293,11 +293,12 @@ class Game:
                     else:
                         self.typed_text += event.unicode
                     continue
-                if event.key == K_SPACE:
-                    self.collide = self.get_collision(self.player, self.npcs)
-                    if self.collide is not None:
-                        self.in_dialogue = not self.in_dialogue
-                        self.wait = False
+                else:
+                    if event.key == K_RETURN:
+                        self.collide = self.get_collision(self.player, self.npcs)
+                        if self.collide is not None:
+                            self.in_dialogue = not self.in_dialogue
+                            self.wait = False
             # End of dialogue toggler
             if not self.in_dialogue:
                 if event.type == MOUSEWHEEL:
