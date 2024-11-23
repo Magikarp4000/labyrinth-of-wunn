@@ -325,9 +325,9 @@ class Game:
         self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
 
         self.camera.render(self.house_texts, padding=5)
-        self.camera.render(self.npcs, Vector2(NPC_SIZE, NPC_SIZE))
+        self.camera.render(self.npcs)
         self.camera.render(self.npc_texts, padding=5)
-        self.camera.render(self.player, Vector2(PLAYER_SIZE, PLAYER_SIZE))
+        self.camera.render(self.player)
 
         self.display_buffer(self.admin_buffer)
         self.display_info()

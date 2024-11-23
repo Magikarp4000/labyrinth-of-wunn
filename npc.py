@@ -26,6 +26,7 @@ class NPC(pygame.sprite.Sprite):
         self.dmg = NPC_DMG
         self.speed = NPC_SPEED / TILE_SIZE
         self.prev_speed = self.speed
+        self.size = Vector2(NPC_SIZE, NPC_SIZE)
 
         self.dialogue = None
 
@@ -40,9 +41,7 @@ class NPC(pygame.sprite.Sprite):
         self.real_pos = Vector2(x, y)
         self.pos = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
-        self.size = NPC_SIZE
-
-        self.image = scale_image(spritesheet.get_image(0, 0), self.size)
+        self.image = pygame.transform.scale(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=(self.pos.x, self.pos.y))
 
         self.target = Vector2(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT))
@@ -112,7 +111,7 @@ class NPC(pygame.sprite.Sprite):
         
         if self.killed:
             img = self.kill_anim.get_image()
-            self.image = scale_image(img, self.size)
+            self.image = pygame.transform.scale(img, self.size)
             self.rect = self.image.get_rect(center=self.pos)
             return
         

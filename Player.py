@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
 
         self.speed = PLAYER_SPEED
-        self.size = PLAYER_SIZE
+        self.size = Vector2(PLAYER_SIZE, PLAYER_SIZE)
 
         self.zoom = 1
 
@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.right = (Animation(spritesheet, 5, [24, 25, 26, 27, 28, 29]), Animation(spritesheet, 5, [6]), Animation(spritesheet, 5, [42, 43, 44, 45]))
         self.up = (Animation(spritesheet, 5, [30, 31, 32, 33, 34, 35]), Animation(spritesheet, 5, [12]), Animation(spritesheet, 5, [48, 49, 50, 51]))
 
-        self.image = scale_image(spritesheet.get_image(0, 0), self.size)
+        self.image = pygame.transform.scale(spritesheet.get_image(0, 0), self.size)
         self.rect = self.image.get_rect(center=self.pos)
 
         self.orit = 0
