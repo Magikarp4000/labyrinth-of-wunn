@@ -337,9 +337,9 @@ class Game:
         self.camera.render_tiles(self.house_tiles, Vector2(HOUSE_WIDTH, HOUSE_HEIGHT), padding=5)
 
         self.camera.render(self.house_texts, padding=5)
-        self.camera.render(self.npcs)
+        self.camera.render(self.npcs, padding=3)
         self.camera.render(self.npc_texts, padding=5)
-        self.camera.render(self.player)
+        self.camera.render(self.player, padding=3)
 
         if self.admin and self.hitbox_flag:
             for npc in self.npcs:

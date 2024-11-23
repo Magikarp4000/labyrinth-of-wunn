@@ -11,6 +11,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+INF = 10**9
+
 TILE_SIZE = 36
 
 # Num of tiles in world
