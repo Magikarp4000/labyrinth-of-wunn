@@ -1,8 +1,12 @@
 # Labyrinth of Wunn
 
+## Information
+- Model: Llama-3.1-8b-instant
+- Framework: Pygame
+
 ## Setup
 1. Install requirements: ```pip install -r requirements.txt```
-2. Create an account and setup API key here: https://console.groq.com/keys
+2. Create an account and setup an API key here: https://console.groq.com/keys
 3. Create a file named `secrets.yaml`
 4. In `secrets.yaml`, write:
    ```
@@ -15,9 +19,8 @@
 2. Run `main.py`
 
 ## Controls
-- WASD or arrow keys: Movement
-- Space: Interact
-- Enter: Enter response
+- WASD/arrow keys: Movement
+- Enter: Interact
 - X: Attack
 - Mouse wheel: Zoom
 ### Admin mode
